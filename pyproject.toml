@@ -13,8 +13,6 @@ python = "^3.10"
 nextcord = "^2.5.0"
 python-dotenv = "^1.0.0"
 requests = "^2.31.0"
-
-[tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
 
 [tool.poetry.scripts]
