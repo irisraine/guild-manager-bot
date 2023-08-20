@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "image-thread-manager"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Iris-Raine <iris.raine.darkest.star@gmail.com>"]
 readme = "README.md"
