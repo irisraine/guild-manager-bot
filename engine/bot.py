@@ -36,7 +36,7 @@ def get_attached_images_urls(message):
     return attached_images_urls
 
 
-def get_textarea_urls(message):
+def get_textarea_images_urls(message):
     url_pattern = re.compile(r'(http|https)://\S+')
     message_content_as_list = message.content.split("\n")
     urls = list(filter(lambda item: url_pattern.match(item), message_content_as_list))
@@ -120,7 +120,7 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    message_images_urls = get_textarea_urls(message) + get_attached_images_urls(message)
+    message_images_urls = get_textarea_images_urls(message) + get_attached_images_urls(message)
     if message_images_urls:
         if not message.author.guild_permissions.administrator:
             is_spam = await check_spam(message)
