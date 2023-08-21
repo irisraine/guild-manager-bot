@@ -19,16 +19,16 @@ This bot does not have any commands, as it is designed to run automatically in t
 ## Usage
 
 If you want to use this bot locally, please make sure to specify the necessary environment variables by creating a .env file 
-in the project directory. This file should contain TOKEN and ALLOWED_CHANNELS environment variables and their corresponding values.
-Finally, you need an API key of Microsoft Content Moderator service.
+in the project directory. This file should contain DISCORD_BOT_TOKEN and ALLOWED_CHANNELS environment variables and their corresponding values.
+Finally, you need an API key of Microsoft Content Moderator service, and place it to CONTENT_MODERATOR_API_KEY variable.
 Here is an example:
 ```
 # Bot token
-TOKEN='your-discord-bot-token-here'
+DISCORD_BOT_TOKEN='your-discord-bot-token-here'
 # Allowed channels
 ALLOWED_CHANNELS=1111111111, 2222222222
 # API key of Microsoft Content Moderator service
-NSFW_CONTENT_MODERATOR_API_KEY='your-api-key-here'
+CONTENT_MODERATOR_API_KEY='your-api-key-here'
 ```
 You can intentionally leave blank the ALLOWED_CHANNELS variable, so bot will have permission to create threads in any public channel.
 
