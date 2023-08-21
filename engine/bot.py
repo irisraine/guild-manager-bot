@@ -25,7 +25,7 @@ MAX_IMAGES = 7
 TIME_LIMIT = 60
 
 user_message_statistics = {}
-active_timeout = {}
+muted_users = {}
 
 
 def get_attached_images_urls(message):
@@ -92,7 +92,7 @@ async def check_spam(message):
         oldest_message_time = user_message_statistics[user_id].popleft()
         current_time = message.created_at.timestamp()
         if current_time - oldest_message_time <= TIME_LIMIT:
-            active_timeout[user_id] = {'channel': message.channel,
+            muted_users[user_id] = {'channel': message.channel,
                                        'reason': MUTE_REASONS['SPAM']}
             await mute_user(message, MUTE_REASONS['SPAM'])
             spam_initial_time = datetime.fromtimestamp(current_time - TIME_LIMIT)
@@ -108,7 +108,7 @@ async def check_nsfw(message, message_images_urls):
 
     for image_url in message_images_urls:
         if await is_image_nsfw(image_url):
-            active_timeout[user_id] = {'channel': message.channel,
+            muted_users[user_id] = {'channel': message.channel,
                                        'reason': MUTE_REASONS['NSFW']}
             await mute_user(message, MUTE_REASONS['NSFW'])
             await delete_message(message)
@@ -135,9 +135,9 @@ async def on_message(message):
 @client.event
 async def on_member_update(before, after):
     if not before.communication_disabled_until and after.communication_disabled_until:
-        if after.id in active_timeout.keys():
-            channel = active_timeout[after.id]['channel']
-            reason_for_muting = active_timeout[after.id]['reason']
+        if after.id in muted_users.keys():
+            channel = muted_users[after.id]['channel']
+            reason_for_muting = muted_users[after.id]['reason']
             mute_info = nextcord.Embed(
                 title=MUTE_HEADER_MESSAGE,
                 description=f'Абоба {after.mention} {reason_for_muting}. '
@@ -145,7 +145,7 @@ async def on_member_update(before, after):
                 colour=nextcord.Colour.from_rgb(255, 0, 0)
             )
             await channel.send(embed=mute_info)
-            active_timeout.pop(after.id, None)
+            muted_users.pop(after.id, None)
 
 
 @client.event
