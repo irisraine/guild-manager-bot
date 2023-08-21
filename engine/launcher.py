@@ -3,11 +3,11 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-TOKEN = os.getenv('TOKEN')
+DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 
 def run_discord_bot():
-    client.run(TOKEN)
+    client.run(DISCORD_BOT_TOKEN)
 
 
 if __name__ == "__main__":
