@@ -33,3 +33,11 @@ CONTENT_MODERATOR_API_KEY='your-api-key-here'
 You can intentionally leave blank the ALLOWED_CHANNELS variable, so bot will have permission to create threads in any public channel.
 
 Once you have added all the necessary environment variables to the .env file, you are ready to use the bot. 
+
+## Limitations
+
+it is important to note that this bot has certain limitations due to the nature of image analysis. The process of analyzing
+each image by AI takes approximately 1 to 2 seconds, which means that in order for the bot to function correctly, it is recommended 
+to use it only on Discord servers with channels in slow mode, which ensures a minimum cooldown of 5 seconds between messages 
+from a single author, allowing the bot enough time to accurately analyze and remove any potentially explicit content. By 
+adhering to these guidelines, you can ensure the effective functioning of this Discord bot.
