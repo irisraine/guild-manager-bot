@@ -1,11 +1,9 @@
-import asyncio
-
 import requests
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-NSFW_CONTENT_MODERATOR_API_KEY = os.environ['NSFW_CONTENT_MODERATOR_API_KEY']
+CONTENT_MODERATOR_API_KEY = os.environ['CONTENT_MODERATOR_API_KEY']
 
 
 async def is_image_nsfw(image_url):
@@ -16,7 +14,7 @@ async def is_image_nsfw(image_url):
 	}
 	headers = {
 		"content-type": "application/json",
-		"X-RapidAPI-Key": NSFW_CONTENT_MODERATOR_API_KEY,
+		"X-RapidAPI-Key": CONTENT_MODERATOR_API_KEY,
 		"X-RapidAPI-Host": "microsoft-content-moderator2.p.rapidapi.com"
 	}
 
