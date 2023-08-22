@@ -39,7 +39,9 @@ def get_attached_images_urls(message):
 def get_textarea_images_urls(message):
     url_pattern = re.compile(r'(http|https)://\S+')
     message_content_as_list = message.content.split("\n")
-    urls = list(filter(lambda item: url_pattern.match(item), message_content_as_list))
+    urls = [url_match.group() for url_match
+            in list(map(lambda item: url_pattern.search(item), message_content_as_list))
+            if url_match]
     textarea_urls = []
     for url in urls:
         try:
