@@ -93,7 +93,7 @@ async def check_spam(message):
         current_time = message.created_at.timestamp()
         if current_time - oldest_message_time <= TIME_LIMIT:
             muted_users[user_id] = {'channel': message.channel,
-                                       'reason': MUTE_REASONS['SPAM']}
+                                    'reason': MUTE_REASONS['SPAM']}
             await mute_user(message, MUTE_REASONS['SPAM'])
             spam_initial_time = datetime.fromtimestamp(current_time - TIME_LIMIT)
             async for item in message.channel.history(limit=None, after=spam_initial_time):
@@ -109,7 +109,7 @@ async def check_nsfw(message, message_images_urls):
     for image_url in message_images_urls:
         if await is_image_nsfw(image_url):
             muted_users[user_id] = {'channel': message.channel,
-                                       'reason': MUTE_REASONS['NSFW']}
+                                    'reason': MUTE_REASONS['NSFW']}
             await mute_user(message, MUTE_REASONS['NSFW'])
             await delete_message(message)
             return True
@@ -140,8 +140,7 @@ async def on_member_update(before, after):
             reason_for_muting = muted_users[after.id]['reason']
             mute_info = nextcord.Embed(
                 title=MUTE_HEADER_MESSAGE,
-                description=f'Абоба {after.mention} {reason_for_muting}. '
-                            f'{MUTE_DESCRIPTION_MESSAGE}',
+                description=f'Абоба {after.mention} {reason_for_muting}. {MUTE_DESCRIPTION_MESSAGE}',
                 colour=nextcord.Colour.from_rgb(255, 0, 0)
             )
             await channel.send(embed=mute_info)
