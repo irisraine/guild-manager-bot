@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import requests
 import os
 import re
+import logging
 from engine.content_moderator import is_image_nsfw
 
 load_dotenv()
@@ -31,7 +32,7 @@ muted_users = {}
 def get_attached_images_urls(message):
     attached_images_urls = []
     for attachment in message.attachments:
-        if attachment.content_type.startswith('image/'):
+        if attachment.content_type and attachment.content_type.startswith('image/'):
             attached_images_urls.append(attachment.url)
     return attached_images_urls
 
@@ -45,7 +46,7 @@ def get_textarea_images_urls(message):
     textarea_urls = []
     for url in urls:
         try:
-            response = requests.head(url)
+            response = requests.head(url, timeout=5)
             if response.status_code == 200 and 'image' in response.headers.get('content-type'):
                 textarea_urls.append(url)
         except requests.exceptions.RequestException:
@@ -59,16 +60,16 @@ async def mute_user(message, reason):
             seconds=TIMEOUT_DURATION),
             reason=reason
         )
-        print(f'User {message.author} has been muted.')
+        logging.info(f"Пользователь {message.author} отправлен в мут.")
     except nextcord.errors.Forbidden:
-        print(f'Privileged users cannot be muted by this bot!')
+        logging.info(f"Бот не может отправлять в мут привилегированных пользователей.")
 
 
 async def delete_message(message):
     try:
         await message.delete()
     except nextcord.errors.NotFound:
-        print(f'Message not found or already deleted')
+        logging.warning("Сообщение не найдено, либо оно уже было удалено ранее.")
 
 
 async def create_thread(message):
@@ -79,9 +80,9 @@ async def create_thread(message):
         )
         await thread.send(GREETING_BOT_MESSAGE)
     except nextcord.errors.HTTPException as e:
-        print(f'An error occurred while creating a thread: {e}')
+        logging.error(f"При попытке создания треда возникла следующая ошибка: {e}.")
     except Exception as e:
-        print(f'An unexpected error occurred: {e}')
+        logging.error(f"При попытке создания треда возникла неопределенная ошибка: {e}.")
 
 
 async def check_spam(message):
@@ -114,6 +115,7 @@ async def check_nsfw(message, message_images_urls):
                                     'reason': MUTE_REASONS['NSFW']}
             await mute_user(message, MUTE_REASONS['NSFW'])
             await delete_message(message)
+            logging.info(f"Изображение по адресу {image_url} содержит NSFW-контент и было удалено.")
             return True
 
 
@@ -131,6 +133,7 @@ async def on_message(message):
                 return
         if ALLOWED_CHANNELS and str(message.channel.id) not in ALLOWED_CHANNELS:
             return
+        logging.info(f"Создан тред для изображения {message_images_urls[0]}")
         await create_thread(message)
 
 
@@ -151,4 +154,4 @@ async def on_member_update(before, after):
 
 @client.event
 async def on_ready():
-    print(f'Logged in as: {client.user.name}')
+    logging.info(f'Бот залогинен под именем: {client.user.name}')
