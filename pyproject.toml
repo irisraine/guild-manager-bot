@@ -14,9 +14,10 @@ nextcord = "^2.5.0"
 python-dotenv = "^1.0.0"
 requests = "^2.31.0"
 flake8 = "^6.0.0"
+logging = "^0.4.9.6"
 
 [tool.poetry.scripts]
-image-thread-manager-bot = "engine.launcher:run_discord_bot"
+image-thread-manager-bot = "engine.run:run_discord_bot"
 
 [build-system]
 requires = ["poetry-core"]

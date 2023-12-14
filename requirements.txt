@@ -7,6 +7,8 @@ charset-normalizer==3.2.0
 flake8==6.0.0
 frozenlist==1.4.0
 idna==3.4
+-e git+ssh://git@github.com/irisraine/image-thread-manager-bot.git@6b638d6a6c600fcb5a4cc2175b76dd7733922f2f#egg=image_thread_manager
+logging==0.4.9.6
 mccabe==0.7.0
 multidict==6.0.4
 nextcord==2.5.0
