@@ -41,9 +41,9 @@ Once you have added all the necessary environment variables to the .env file, yo
 
 ## Commands
 
-`.dynamic_banner` - activate dynamic banner. After using this command, bot will automatically update the server banner with 
+- `.dynamic_banner` - activate dynamic banner. After using this command, bot will automatically update the server banner with 
 info of overall server members number. Updating period is set to 10 minutes.
-`.static_banner` - turn off dynamic banner.
+- `.static_banner` - turn off dynamic banner.
 
 ## Limitations
 
