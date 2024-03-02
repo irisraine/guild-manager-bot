@@ -171,7 +171,7 @@ async def banner_member_counter():
             members_count=current_members_count,
             voice_count=current_voice_count
         )
-        banner_binary_data = utils.get_banner_binary_data(config.BANNER_IMAGE_COUNTER)
+        banner_binary_data = utils.get_banner_binary_data(config.BANNER_WITH_COUNTER_IMAGE)
         await guild.edit(banner=banner_binary_data)
         members_count, voice_count = current_members_count, current_voice_count
 

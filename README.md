@@ -39,6 +39,9 @@ You can intentionally leave blank the ALLOWED_CHANNELS variable, so bot will hav
 
 Once you have added all the necessary environment variables to the .env file, you are ready to use the bot. 
 
+If you want to use a dynamic banner function, be sure that you put your current server's banner image in `assets` folder with name `banner.jpg` (replace the default image). 
+The image must have a resolution of 1024x576 pixels.
+
 ## Commands
 
 - `.dynamic_banner` - activate dynamic banner. After using this command, bot will automatically update the server banner with 
