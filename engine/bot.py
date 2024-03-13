@@ -17,16 +17,21 @@ client = commands.Bot(command_prefix='.', intents=intents)
 
 ALLOWED_CHANNELS = os.environ['ALLOWED_CHANNELS']
 GUILD_ID = int(os.environ['GUILD_ID'])
+COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
 
 COMMENTS_THREAD_NAME = "💬 Оставить комментарии"
 GREETING_BOT_MESSAGE = "Создана ветка обсуждения"
 MUTE_HEADER_MESSAGE = '❌ Здравствуйте, вам бан! ❌'
+GIF_WARNING_HEADER_MESSAGE = '💢 It\'s time to stop! 💢'
 MUTE_REASONS = {'SPAM': "спамил картинками",
                 'NSFW': "постил непотребства"}
-MUTE_DESCRIPTION_MESSAGE = 'Теперь он улетает в мут, хорошенько подумать о своем поведении!'
+MUTE_DESCRIPTION_MESSAGE = "Теперь он улетает в мут, хорошенько подумать о своем поведении!"
+GIF_WARNING_DESCRIPTION_MESSAGE = ("Ваш бесплатный пробный период использования гифок на данный момент закончился. "
+                                   "Для продления насыпьте костей или сена в кормушку модераторам.")
 
 user_message_statistics = {}
 muted_users = {}
+users_last_gif_time = {}
 
 members_count = 0
 voice_count = 0
@@ -42,6 +47,7 @@ def get_attached_images_urls(message):
 
 def get_textarea_images_urls(message):
     url_pattern = re.compile(r'(http|https)://\S+')
+    domains = ['media1.tenor.com', 'tenor.com/view', 'giphy.com']
     message_content_as_list = message.content.split("\n")
     urls = [url_match.group() for url_match
             in list(map(lambda item: url_pattern.search(item), message_content_as_list))
@@ -49,9 +55,15 @@ def get_textarea_images_urls(message):
     textarea_urls = []
     for url in urls:
         try:
-            response = requests.head(url, timeout=5)
-            if response.status_code == 200 and 'image' in response.headers.get('content-type'):
-                textarea_urls.append(url)
+            if not domains[0] in url:
+                response = requests.head(url, timeout=5)
+                if response.status_code == 200:
+                    if 'image' in response.headers.get('content-type') or (domains[1] in url or domains[2] in url):
+                        textarea_urls.append(url)
+            else:
+                response = requests.get(url, timeout=5)
+                if response.status_code == 200:
+                    textarea_urls.append(url)
         except requests.exceptions.RequestException:
             continue
     return textarea_urls
@@ -59,13 +71,13 @@ def get_textarea_images_urls(message):
 
 async def mute_user(message, reason):
     try:
-        await message.author.timeout(timedelta(
-            seconds=config.TIMEOUT_DURATION),
+        await message.author.timeout(
+            timedelta(seconds=config.TIMEOUT_DURATION),
             reason=reason
         )
         logging.info(f"Пользователь {message.author} отправлен в мут.")
     except nextcord.errors.Forbidden:
-        logging.info(f"Бот не может отправлять в мут привилегированных пользователей.")
+        logging.info("Бот не может отправлять в мут привилегированных пользователей.")
 
 
 async def delete_message(message):
@@ -123,6 +135,25 @@ async def check_nsfw(message, message_images_urls):
             return True
 
 
+async def check_gifs(message, message_images_urls):
+    gif_extension_pattern = r"tenor\.com|giphy\.com|\.gif($|\?|&)"
+    if any(list(map(lambda image_url: re.search(gif_extension_pattern, image_url), message_images_urls))):
+        global users_last_gif_time
+        user_id = message.author.id
+        current_time = datetime.now()
+        cooldown = timedelta(seconds=config.GIF_COOLDOWN_DURATION)
+        if user_id in users_last_gif_time and current_time - users_last_gif_time[user_id] < cooldown:
+            await message.channel.send(
+                embed=nextcord.Embed(
+                    title=GIF_WARNING_HEADER_MESSAGE,
+                    description=f"Уважаемый {message.author.mention}! {GIF_WARNING_DESCRIPTION_MESSAGE}",
+                    colour=nextcord.Colour.from_rgb(255, 0, 0))
+            )
+            await delete_message(message)
+        else:
+            users_last_gif_time[user_id] = current_time
+
+
 @client.event
 async def on_message(message):
     if message.author.bot:
@@ -135,6 +166,8 @@ async def on_message(message):
             is_nsfw = await check_nsfw(message, message_images_urls)
             if is_spam or is_nsfw:
                 return
+            if message.channel.id == COMMON_DISCUSSION_CHANNEL:
+                await check_gifs(message, message_images_urls)
         if ALLOWED_CHANNELS and str(message.channel.id) not in ALLOWED_CHANNELS:
             return
         logging.info(f"Создан тред для изображения {message_images_urls[0]}")
@@ -183,14 +216,14 @@ async def static_banner(ctx):
     banner_member_counter.stop()
     banner_binary_data = utils.get_banner_binary_data(config.BANNER_IMAGE)
     await guild.edit(banner=banner_binary_data)
-    logging.info(f'Динамический баннер отключен.')
+    logging.info('Динамический баннер отключен.')
 
 
 @client.command()
 @commands.has_permissions(administrator=True)
 async def dynamic_banner(ctx):
     banner_member_counter.start()
-    logging.info(f'Динамический баннер активирован.')
+    logging.info('Динамический баннер активирован.')
 
 
 @static_banner.error
