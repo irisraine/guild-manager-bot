@@ -53,7 +53,7 @@ The image must have a resolution of 1024x576 pixels.
 - `.dynamic_banner` - activate dynamic banner. After using this command, bot will automatically update the server banner with 
 info of overall server members number. Updating period is set to 10 minutes.
 - `.static_banner` - turn off dynamic banner.
-- `toggle_gif_limits` - turn on/off gif images limitation function.
+- `.toggle_gif_limits` - turn on/off gif images limitation function.
 
 ## Limitations
 
