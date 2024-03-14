@@ -222,6 +222,11 @@ async def static_banner(ctx):
     banner_member_counter.stop()
     banner_binary_data = utils.get_banner_binary_data(config.BANNER_IMAGE)
     await guild.edit(banner=banner_binary_data)
+    await ctx.send(
+        embed=nextcord.Embed(
+            description=f"Динамический баннер отключен.",
+            colour=nextcord.Colour.from_rgb(255, 0, 0))
+    )
     logging.info('Динамический баннер отключен.')
 
 
@@ -229,6 +234,11 @@ async def static_banner(ctx):
 @commands.has_permissions(administrator=True)
 async def dynamic_banner(ctx):
     banner_member_counter.start()
+    await ctx.send(
+        embed=nextcord.Embed(
+            description=f"Динамический баннер активирован.",
+            colour=nextcord.Colour.from_rgb(255, 0, 0))
+    )
     logging.info('Динамический баннер активирован.')
 
 
