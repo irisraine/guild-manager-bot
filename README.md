@@ -14,7 +14,7 @@ threshold to determine whether the image should be considered NSFW.
 By utilizing the Content Moderator service, the bot can accurately detect and moderate NSFW images in real-time, ensuring 
 a safe and appropriate environment for all users.
 
-Another moderation function of the bot is watching over using of gif-images by users and response if someone tries to overuse them - bot
+Another moderation function of the bot is watching over using of gif images by users and response if someone tries to overuse them - bot
 detects whether user post gif image more than once per 10 minutes, and delete all excessive images, posted during this period.
 
 Finally, this Discord bot has an option to automatically update your server's banner to display the overall number of server members and 
@@ -53,6 +53,7 @@ The image must have a resolution of 1024x576 pixels.
 - `.dynamic_banner` - activate dynamic banner. After using this command, bot will automatically update the server banner with 
 info of overall server members number. Updating period is set to 10 minutes.
 - `.static_banner` - turn off dynamic banner.
+- `toggle_gif_limits` - turn on/off gif images limitation function.
 
 ## Limitations
 

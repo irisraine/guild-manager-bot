@@ -31,7 +31,9 @@ GIF_WARNING_DESCRIPTION_MESSAGE = ("Ваш бесплатный пробный �
 
 user_message_statistics = {}
 muted_users = {}
-users_last_gif_time = {}
+
+users_gifs = {}
+is_gif_limits = False
 
 members_count = 0
 voice_count = 0
@@ -138,20 +140,24 @@ async def check_nsfw(message, message_images_urls):
 async def check_gifs(message, message_images_urls):
     gif_extension_pattern = r"tenor\.com|giphy\.com|\.gif($|\?|&)"
     if any(list(map(lambda image_url: re.search(gif_extension_pattern, image_url), message_images_urls))):
-        global users_last_gif_time
+        global users_gifs
         user_id = message.author.id
         current_time = datetime.now()
         cooldown = timedelta(seconds=config.GIF_COOLDOWN_DURATION)
-        if user_id in users_last_gif_time and current_time - users_last_gif_time[user_id] < cooldown:
-            await message.channel.send(
-                embed=nextcord.Embed(
+        if user_id in users_gifs and current_time - users_gifs[user_id].get('time') < cooldown:
+            warning = nextcord.Embed(
                     title=GIF_WARNING_HEADER_MESSAGE,
                     description=f"Уважаемый {message.author.mention}! {GIF_WARNING_DESCRIPTION_MESSAGE}",
                     colour=nextcord.Colour.from_rgb(255, 0, 0))
-            )
+            if users_gifs[user_id].get('warning_id'):
+                previous_warning_id = users_gifs[user_id].get('warning_id')
+                previous_warning_message = await message.channel.fetch_message(previous_warning_id)
+                await delete_message(previous_warning_message)
+            warning_message = await message.channel.send(embed=warning)
+            users_gifs[user_id]['warning_id'] = warning_message.id
             await delete_message(message)
         else:
-            users_last_gif_time[user_id] = current_time
+            users_gifs[user_id] = {'time': current_time, 'warning_id': None}
 
 
 @client.event
@@ -166,7 +172,7 @@ async def on_message(message):
             is_nsfw = await check_nsfw(message, message_images_urls)
             if is_spam or is_nsfw:
                 return
-            if message.channel.id == COMMON_DISCUSSION_CHANNEL:
+            if is_gif_limits and message.channel.id == COMMON_DISCUSSION_CHANNEL:
                 await check_gifs(message, message_images_urls)
         if ALLOWED_CHANNELS and str(message.channel.id) not in ALLOWED_CHANNELS:
             return
@@ -226,6 +232,21 @@ async def dynamic_banner(ctx):
     logging.info('Динамический баннер активирован.')
 
 
+@client.command()
+@commands.has_permissions(administrator=True)
+async def toggle_gif_limits(ctx):
+    global is_gif_limits
+    is_gif_limits = not is_gif_limits
+    status = "активировано" if is_gif_limits else "отключено"
+    await ctx.send(
+        embed=nextcord.Embed(
+            description=f"Ограничение на использование гифок {status}.",
+            colour=nextcord.Colour.from_rgb(255, 0, 0))
+    )
+    logging.info(f'Ограничение на использование гифок {status}.')
+
+
+@toggle_gif_limits.error
 @static_banner.error
 @dynamic_banner.error
 async def permission_error(ctx, error):
