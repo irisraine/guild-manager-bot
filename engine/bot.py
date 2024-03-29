@@ -276,8 +276,7 @@ async def toggle_gif_limits(ctx):
     global is_gif_limits
     is_gif_limits = not is_gif_limits
     if is_gif_limits:
-        if not purge_gif_warnings.is_running():
-            purge_gif_warnings.start()
+        purge_gif_warnings.start()
     else:
         purge_gif_warnings.stop()
         users_gifs.clear()
