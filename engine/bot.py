@@ -13,7 +13,7 @@ import engine.config as config
 
 load_dotenv()
 intents = nextcord.Intents.all()
-client = commands.Bot(command_prefix='.', intents=intents)
+client = commands.Bot(command_prefix='&', intents=intents)
 
 ALLOWED_CHANNELS = os.environ['ALLOWED_CHANNELS']
 GUILD_ID = int(os.environ['GUILD_ID'])
@@ -152,7 +152,8 @@ async def check_gifs(message, message_images_urls):
             if users_gifs[user_id].get('warning_id'):
                 previous_warning_id = users_gifs[user_id].get('warning_id')
                 previous_warning_message = await message.channel.fetch_message(previous_warning_id)
-                await delete_message(previous_warning_message)
+                if previous_warning_message:
+                    await delete_message(previous_warning_message)
             warning_message = await message.channel.send(embed=warning)
             users_gifs[user_id]['warning_id'] = warning_message.id
             await delete_message(message)
@@ -215,6 +216,18 @@ async def banner_member_counter():
         members_count, voice_count = current_members_count, current_voice_count
 
 
+@tasks.loop(minutes=10)
+async def purge_gif_warnings():
+    channel = client.get_channel(COMMON_DISCUSSION_CHANNEL)
+    for user_id, gif_info in users_gifs.items():
+        current_warning_id = gif_info.get('warning_id')
+        if current_warning_id:
+            current_warning_message = await channel.fetch_message(current_warning_id)
+            if current_warning_message:
+                await delete_message(current_warning_message)
+                users_gifs[user_id]['warning_id'] = None
+
+
 @client.command()
 @commands.has_permissions(administrator=True)
 async def static_banner(ctx):
@@ -247,6 +260,12 @@ async def dynamic_banner(ctx):
 async def toggle_gif_limits(ctx):
     global is_gif_limits
     is_gif_limits = not is_gif_limits
+    if is_gif_limits:
+        if not purge_gif_warnings.is_running():
+            purge_gif_warnings.start()
+    else:
+        purge_gif_warnings.stop()
+        users_gifs.clear()
     status = "активировано" if is_gif_limits else "отключено"
     await ctx.send(
         embed=nextcord.Embed(
