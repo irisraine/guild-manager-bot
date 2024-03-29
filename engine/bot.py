@@ -87,6 +87,22 @@ async def delete_message(message):
         await message.delete()
     except nextcord.errors.NotFound:
         logging.warning("Сообщение не найдено, либо оно уже было удалено ранее.")
+    except Exception as e:
+        logging.error(f"При попытке удаления сообщения возникла неопределенная ошибка: {e}.")
+        return None
+
+
+async def safe_fetch_message(message_id):
+    channel = client.get_channel(COMMON_DISCUSSION_CHANNEL)
+    try:
+        fetched_message = await channel.fetch_message(message_id)
+        return fetched_message
+    except nextcord.NotFound:
+        logging.info("Сообщение с предупреждением отсутствует, видимо, оно было ранее удалено вручную.")
+        return None
+    except Exception as e:
+        logging.error(f"При попытке получения сообщения возникла неопределенная ошибка: {e}.")
+        return None
 
 
 async def create_thread(message):
@@ -151,12 +167,9 @@ async def check_gifs(message, message_images_urls):
                     colour=nextcord.Colour.from_rgb(255, 0, 0))
             if users_gifs[user_id].get('warning_id'):
                 previous_warning_id = users_gifs[user_id].get('warning_id')
-                try:
-                    previous_warning_message = await message.channel.fetch_message(previous_warning_id)
-                    if previous_warning_message:
-                        await delete_message(previous_warning_message)
-                except nextcord.NotFound:
-                    logging.info("Сообщение с предупреждением отсутствует, видимо, оно было ранее удалено вручную.")
+                previous_warning_message = await safe_fetch_message(previous_warning_id)
+                if previous_warning_message:
+                    await delete_message(previous_warning_message)
             warning_message = await message.channel.send(embed=warning)
             users_gifs[user_id]['warning_id'] = warning_message.id
             await delete_message(message)
@@ -221,17 +234,13 @@ async def banner_member_counter():
 
 @tasks.loop(minutes=10)
 async def purge_gif_warnings():
-    channel = client.get_channel(COMMON_DISCUSSION_CHANNEL)
     for user_id, gif_info in users_gifs.items():
         current_warning_id = gif_info.get('warning_id')
         if current_warning_id:
-            try:
-                current_warning_message = await channel.fetch_message(current_warning_id)
-                if current_warning_message:
-                    await delete_message(current_warning_message)
-                    users_gifs[user_id]['warning_id'] = None
-            except nextcord.NotFound:
-                logging.info("Сообщение с предупреждением отсутствует, видимо, оно было ранее удалено вручную.")
+            current_warning_message = await safe_fetch_message(current_warning_id)
+            if current_warning_message:
+                await delete_message(current_warning_message)
+                users_gifs[user_id]['warning_id'] = None
 
 
 @client.command()
