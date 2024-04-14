@@ -68,6 +68,9 @@ def get_textarea_images_urls(message):
                     textarea_urls.append(url)
         except requests.exceptions.RequestException:
             continue
+        except Exception as e:
+            logging.error(f"Неизвестная ошибка при обработке ссылки. Дополнительная информация: {e}")
+            continue
     return textarea_urls
 
 
