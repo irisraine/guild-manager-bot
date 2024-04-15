@@ -1,3 +1,12 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ALLOWED_CHANNELS = os.environ['ALLOWED_CHANNELS']
+GUILD_ID = int(os.environ['GUILD_ID'])
+COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
+
 TIMEOUT_DURATION = 9000
 GIF_COOLDOWN_DURATION = 600
 MAX_IMAGES = 7

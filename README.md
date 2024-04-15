@@ -55,6 +55,12 @@ info of overall server members number. Updating period is set to 10 minutes.
 - `&static_banner` - turn off dynamic banner.
 - `&toggle_gif_limits` - turn on/off gif images limitation function.
 
+## Extensions
+
+The bot can obtain additional functionality via using extensions located in the `cogs` folder. To activate or deactivate them use the command `&toggle_extensions`. 
+Currently, the bot includes single extension that give you an ability to post messages through the bot to a general discussion 
+channel, with its ID specified in the environment variables. To call the menu for sending messages, use the `&say` command.
+
 ## Limitations
 
 it is important to note that this bot has certain limitations due to the nature of image analysis. The process of analyzing

@@ -6,18 +6,12 @@ import requests
 import re
 import os
 import logging
-from dotenv import load_dotenv
 from engine.content_moderator import is_image_nsfw
 import engine.utils as utils
 import engine.config as config
 
-load_dotenv()
 intents = nextcord.Intents.all()
 client = commands.Bot(command_prefix='&', intents=intents)
-
-ALLOWED_CHANNELS = os.environ['ALLOWED_CHANNELS']
-GUILD_ID = int(os.environ['GUILD_ID'])
-COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
 
 COMMENTS_THREAD_NAME = "💬 Оставить комментарии"
 GREETING_BOT_MESSAGE = "Создана ветка обсуждения"
@@ -96,7 +90,7 @@ async def delete_message(message):
 
 
 async def safe_fetch_message(message_id):
-    channel = client.get_channel(COMMON_DISCUSSION_CHANNEL)
+    channel = client.get_channel(config.COMMON_DISCUSSION_CHANNEL)
     try:
         fetched_message = await channel.fetch_message(message_id)
         return fetched_message
@@ -192,9 +186,9 @@ async def on_message(message):
             is_nsfw = await check_nsfw(message, message_images_urls)
             if is_spam or is_nsfw:
                 return
-            if is_gif_limits and message.channel.id == COMMON_DISCUSSION_CHANNEL:
+            if is_gif_limits and message.channel.id == config.COMMON_DISCUSSION_CHANNEL:
                 await check_gifs(message, message_images_urls)
-        if ALLOWED_CHANNELS and str(message.channel.id) not in ALLOWED_CHANNELS:
+        if config.ALLOWED_CHANNELS and str(message.channel.id) not in config.ALLOWED_CHANNELS:
             return
         logging.info(f"Создан тред для изображения {message_images_urls[0]}")
         await create_thread(message)
@@ -220,7 +214,7 @@ async def on_member_update(before, after):
 
 @tasks.loop(minutes=10)
 async def banner_member_counter():
-    guild = client.get_guild(GUILD_ID)
+    guild = client.get_guild(config.GUILD_ID)
     global members_count, voice_count
     current_members_count = guild.member_count
     current_voice_count = sum(1 for member in guild.members if member.voice)
@@ -249,7 +243,7 @@ async def purge_gif_warnings():
 @client.command()
 @commands.has_permissions(administrator=True)
 async def static_banner(ctx):
-    guild = client.get_guild(GUILD_ID)
+    guild = client.get_guild(config.GUILD_ID)
     banner_member_counter.stop()
     banner_binary_data = utils.get_banner_binary_data(config.BANNER_IMAGE)
     await guild.edit(banner=banner_binary_data)
@@ -292,6 +286,37 @@ async def toggle_gif_limits(ctx):
     logging.info(f'Ограничение на использование гифок {status}.')
 
 
+@client.command()
+@commands.has_permissions(administrator=True)
+async def toggle_extensions(ctx):
+    for filename in os.listdir('engine/cogs'):
+        if filename.endswith('.py'):
+            extension = filename[:-3]
+            extension_name = f'engine.cogs.{extension}'
+            try:
+                if extension_name in client.extensions:
+                    client.unload_extension(extension_name)
+                    await ctx.send(
+                            embed=nextcord.Embed(
+                                description=f"Расширение {extension} отключено.",
+                                colour=nextcord.Colour.from_rgb(255, 0, 0)))
+                    logging.info(f'Расширение {extension} отключено.')
+                else:
+                    client.load_extension(extension_name)
+                    await ctx.send(
+                        embed=nextcord.Embed(
+                            description=f"Расширение {extension} успешно активировано.",
+                            colour=nextcord.Colour.from_rgb(255, 0, 0)))
+                    logging.info(f'Расширение {extension} успешно активировано.')
+            except Exception as e:
+                await ctx.send(
+                    embed=nextcord.Embed(
+                        description=f"Ошибка при попытке загрузки расширения {extension}.",
+                        colour=nextcord.Colour.from_rgb(255, 0, 0)))
+                logging.error(f'Ошибка при попытке загрузки расширения {extension}. Дополнительная информация: {e}')
+
+
+@toggle_extensions.error
 @toggle_gif_limits.error
 @static_banner.error
 @dynamic_banner.error
