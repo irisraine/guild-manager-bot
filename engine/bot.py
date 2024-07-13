@@ -68,6 +68,15 @@ def get_textarea_images_urls(message):
     return textarea_urls
 
 
+def has_attached_videos(message):
+    youtube_url_pattern = re.compile(r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/.+')
+    has_video_attachment = any(
+        attachment.content_type.startswith('video/') for attachment in message.attachments
+    )
+    has_youtube_link = youtube_url_pattern.search(message.content) is not None
+    return True if (has_video_attachment or has_youtube_link) else False
+
+
 async def mute_user(message, reason):
     try:
         await message.author.timeout(
@@ -191,6 +200,8 @@ async def on_message(message):
         if config.ALLOWED_CHANNELS and str(message.channel.id) not in config.ALLOWED_CHANNELS:
             return
         logging.info(f"Создан тред для изображения {message_images_urls[0]}")
+        await create_thread(message)
+    elif has_attached_videos(message):
         await create_thread(message)
 
     await client.process_commands(message)
