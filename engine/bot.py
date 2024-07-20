@@ -195,7 +195,7 @@ async def on_message(message):
                 return
             if is_gif_limits and message.channel.id == config.COMMON_DISCUSSION_CHANNEL:
                 await check_gifs(message, message_images_urls)
-        if config.ALLOWED_CHANNELS and str(message.channel.id) not in config.ALLOWED_CHANNELS:
+        if config.ALLOWED_CHANNELS and message.channel.id not in config.ALLOWED_CHANNELS:
             return
         logging.info(f"Создан тред для изображения {message_images_urls[0]}")
         await create_thread(message)
