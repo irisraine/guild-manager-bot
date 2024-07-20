@@ -1,5 +1,6 @@
 import nextcord
 from nextcord.ext import commands
+import logging
 import engine.config as config
 
 
@@ -33,17 +34,24 @@ class SoloToggler(commands.Cog):
             await member.remove_roles(role)
             await ctx.send(embed=nextcord.Embed(
                 title="❌ Роль снята",
-                description=f"Ковбой {member.mention} покинул город Подфайловск.",
+                description=f"Ковбой {member.mention} лишился роли {role.mention}, а вместе с ней и гражданства "
+                            f"города Подфайловска, и был вынужден покинуть его.\n\n "
+                            f"*Роль снял {ctx.author.mention}*",
                 color=nextcord.Color.green()
             ))
+            logging.info(f"C участника {username} снята роль соло сессии, "
+                         f"ее забрал модератор {ctx.author.display_name}.")
         else:
             await member.add_roles(role)
             await ctx.send(embed=nextcord.Embed(
                 title="✅ Роль выдана",
                 description=f"Ковбой {member.mention} получает роль {role.mention} "
-                            f"и триумфально въезжает в город Подфайловск!",
+                            f"и триумфально въезжает в город Подфайловск, становясь его полноправным гражданином!\n\n "
+                            f"*Роль выдал {ctx.author.mention}*",
                 color=nextcord.Color.green()
             ))
+            logging.info(f"Участник {username} получил роль соло сессии, "
+                         f"ee выдал модератор {ctx.author.display_name}.")
 
 
 def setup(client):
