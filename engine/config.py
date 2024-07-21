@@ -6,7 +6,7 @@ load_dotenv()
 ALLOWED_CHANNELS = list(map(int, os.environ['ALLOWED_CHANNELS'].split(",")))
 GUILD_ID = int(os.environ['GUILD_ID'])
 COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
-MODERATOR_ROLE_ID = int(os.environ['MODERATOR_ROLE_ID'])
+MODERATOR_ROLE = int(os.environ['MODERATOR_ROLE'])
 GROUP_LEADERS_ROLES = list(map(int, os.environ['GROUP_LEADERS_ROLES'].split(",")))
 SOLO_SESSION_ROLE = int(os.environ['SOLO_SESSION_ROLE'])
 

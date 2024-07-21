@@ -17,7 +17,7 @@ class SoloManager(commands.Cog):
     @commands.command()
     async def solo(self, ctx, username: str):
         if not (ctx.author.guild_permissions.administrator or
-                any(role.id in [config.MODERATOR_ROLE_ID] + config.GROUP_LEADERS_ROLES for role in ctx.author.roles)):
+                any(role.id in [config.MODERATOR_ROLE] + config.GROUP_LEADERS_ROLES for role in ctx.author.roles)):
             await ctx.send(embed=nextcord.Embed(
                 title=ERROR_HEADER,
                 description=SOLO_MANAGER_USAGE_RESTRICTION,
