@@ -10,7 +10,7 @@ ROLE_SET = "✅ Роль выдана"
 ROLE_REMOVED = "❌ Роль снята"
 
 
-class SoloToggler(commands.Cog):
+class SoloManager(commands.Cog):
     def __init__(self, client):
         self.client = client
 
@@ -60,4 +60,4 @@ class SoloToggler(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(SoloToggler(client))
+    client.add_cog(SoloManager(client))
