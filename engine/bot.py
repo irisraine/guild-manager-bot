@@ -4,7 +4,6 @@ import nextcord
 from nextcord.ext import commands, tasks
 import requests
 import re
-import os
 import logging
 from engine.content_moderator import is_image_nsfw
 import engine.utils as utils
