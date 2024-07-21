@@ -1,5 +1,6 @@
 from engine.bot import client
 from engine.logger import init_logger
+from engine.utils import load_cogs
 from dotenv import load_dotenv
 import os
 
@@ -9,6 +10,7 @@ DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 def run_discord_bot():
     init_logger()
+    load_cogs(client)
     client.run(DISCORD_BOT_TOKEN)
 
 

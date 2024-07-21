@@ -1,5 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 import engine.config as config
+import os
+import logging
 
 
 def update_banner(members_count, voice_count):
@@ -32,3 +34,15 @@ def get_banner_binary_data(image):
     with open(image, 'rb') as banner_file:
         banner_binary_data = banner_file.read()
     return banner_binary_data
+
+
+def load_cogs(client):
+    for filename in os.listdir('engine/cogs'):
+        if filename.endswith('.py'):
+            extension = filename[:-3]
+            extension_name = f'engine.cogs.{extension}'
+            try:
+                client.load_extension(extension_name)
+                logging.info(f'Расширение {extension} успешно загружено.')
+            except Exception as e:
+                logging.error(f'Ошибка при попытке загрузки расширения {extension}. Дополнительная информация: {e}')

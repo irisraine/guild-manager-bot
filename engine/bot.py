@@ -297,35 +297,32 @@ async def toggle_gif_limits(ctx):
 
 @client.command()
 @commands.has_permissions(administrator=True)
-async def toggle_extensions(ctx):
-    for filename in os.listdir('engine/cogs'):
-        if filename.endswith('.py'):
-            extension = filename[:-3]
-            extension_name = f'engine.cogs.{extension}'
-            try:
-                if extension_name in client.extensions:
-                    client.unload_extension(extension_name)
-                    await ctx.send(
-                            embed=nextcord.Embed(
-                                description=f"Расширение {extension} отключено.",
-                                colour=nextcord.Colour.from_rgb(255, 0, 0)))
-                    logging.info(f'Расширение {extension} отключено.')
-                else:
-                    client.load_extension(extension_name)
-                    await ctx.send(
-                        embed=nextcord.Embed(
-                            description=f"Расширение {extension} успешно активировано.",
-                            colour=nextcord.Colour.from_rgb(255, 0, 0)))
-                    logging.info(f'Расширение {extension} успешно активировано.')
-            except Exception as e:
-                await ctx.send(
-                    embed=nextcord.Embed(
-                        description=f"Ошибка при попытке загрузки расширения {extension}.",
-                        colour=nextcord.Colour.from_rgb(255, 0, 0)))
-                logging.error(f'Ошибка при попытке загрузки расширения {extension}. Дополнительная информация: {e}')
+async def toggle_extension(ctx, extension: str):
+    extension_name = f'engine.cogs.{extension}'
+    try:
+        if extension_name in client.extensions:
+            client.unload_extension(extension_name)
+            await ctx.send(
+                embed=nextcord.Embed(
+                    description=f"Расширение {extension} отключено.",
+                    colour=nextcord.Colour.from_rgb(255, 0, 0)))
+            logging.info(f'Расширение {extension} отключено.')
+        else:
+            client.load_extension(extension_name)
+            await ctx.send(
+                embed=nextcord.Embed(
+                    description=f"Расширение {extension} успешно активировано.",
+                    colour=nextcord.Colour.from_rgb(255, 0, 0)))
+            logging.info(f'Расширение {extension} успешно активировано.')
+    except Exception as e:
+        await ctx.send(
+            embed=nextcord.Embed(
+                description=f"Ошибка при попытке загрузки расширения {extension}.",
+                colour=nextcord.Colour.from_rgb(255, 0, 0)))
+        logging.error(f'Ошибка при попытке загрузки расширения {extension}. Дополнительная информация: {e}')
 
 
-@toggle_extensions.error
+@toggle_extension.error
 @toggle_gif_limits.error
 @static_banner.error
 @dynamic_banner.error

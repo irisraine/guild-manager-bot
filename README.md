@@ -57,9 +57,8 @@ info of overall server members number. Updating period is set to 10 minutes.
 
 ## Extensions
 
-The bot can obtain additional functionality via using extensions located in the `cogs` folder. To activate or deactivate them use the command `&toggle_extensions`. 
-Currently, the bot includes single extension that give you an ability to post messages through the bot to a general discussion 
-channel, with its ID specified in the environment variables. To call the menu for sending messages, use the `&say` command.
+The bot can obtain additional functionality via using extensions located in the `cogs` folder. Extensions are loading automatically at startup. 
+Also, you can manually load or unload specific extensions use `&toggle_extension <extension_name>` command.
 
 ## Limitations
 
