@@ -20,15 +20,15 @@ class BandManager(commands.Cog):
     async def band(self, interaction: nextcord.Interaction):
         pass
 
-    async def handle_role(self, interaction: nextcord.Interaction, member: nextcord.Member, action: str):
-        if member.bot:
+    async def handle_role(self, interaction: nextcord.Interaction, member_to_assign: nextcord.Member, action: str):
+        if member_to_assign.bot:
             await interaction.response.send_message(embed=nextcord.Embed(
                 title=ERROR_HEADER,
                 description=UNABLE_TO_ASSIGN_ROLE_TO_BOT,
                 color=nextcord.Color.red()
             ), ephemeral=True)
             return
-        if member.id == interaction.user.id:
+        if member_to_assign.id == interaction.user.id:
             await interaction.response.send_message(embed=nextcord.Embed(
                 title=ERROR_HEADER,
                 description=UNABLE_TO_ASSIGN_ROLE_TO_YOURSELF,
@@ -36,8 +36,7 @@ class BandManager(commands.Cog):
             ), ephemeral=True)
             return
 
-        user_roles_ids = [role.id for role in interaction.user.roles]
-        band_leader_role_id = list(filter(lambda role_id: role_id in config.GROUP_LEADERS_ROLES, user_roles_ids))
+        band_leader_role_id = [role.id for role in interaction.user.roles if role.id in config.GROUP_LEADERS_ROLES]
         if not band_leader_role_id:
             await interaction.response.send_message(embed=nextcord.Embed(
                 title=ERROR_HEADER,
@@ -45,45 +44,58 @@ class BandManager(commands.Cog):
                 color=nextcord.Color.red()
             ), ephemeral=True)
             return
-        band_role = nextcord.utils.get(
-            interaction.guild.roles,
-            id=config.GROUP_ROLES[config.GROUP_LEADERS_ROLES.index(band_leader_role_id[0])])
+        band_role_id = config.GROUP_ROLES[config.GROUP_LEADERS_ROLES.index(band_leader_role_id[0])]
+        band_role = nextcord.utils.get(interaction.guild.roles, id=band_role_id)
 
         if action == "add":
-            if band_role not in member.roles:
-                await member.add_roles(band_role)
+            other_band_role_id = [
+                role.id for role in member_to_assign.roles
+                if role.id in (set(config.GROUP_ROLES) - {band_role_id})
+            ]
+            if other_band_role_id:
+                other_band_role = nextcord.utils.get(interaction.guild.roles, id=other_band_role_id[0])
+                await interaction.response.send_message(embed=nextcord.Embed(
+                    title=ERROR_HEADER,
+                    description=f"Вы не можете добавить пользователя {member_to_assign.mention} в свою банду, "
+                                f"поскольку он уже состоит в {other_band_role.mention}!",
+                    color=nextcord.Color.red()
+                ), ephemeral=True)
+                return
+
+            if band_role not in member_to_assign.roles:
+                await member_to_assign.add_roles(band_role)
                 await interaction.response.send_message(embed=nextcord.Embed(
                     title=BAND_ROLE_SET,
-                    description=f"Ковбой {member.mention} вступает в {band_role.mention}, и вместе с новыми "
+                    description=f"Ковбой {member_to_assign.mention} вступает в {band_role.mention}, и вместе с новыми "
                                 f"товарищами готов взяться за дела, слава о которых "
                                 f"еще прогремит по всему Дикому Западу!\n\n "                                
                                 f"*Членство выдал предводитель банды {interaction.user.mention}*",
                     color=nextcord.Color.green()
                 ))
-                logging.info(f"Участник {member.display_name} получил членство в {band_role.name}, "
+                logging.info(f"Участник {member_to_assign.display_name} получил членство в {band_role.name}, "
                              f"ee выдал предводитель банды {interaction.user.display_name}.")
             else:
                 await interaction.response.send_message(embed=nextcord.Embed(
                     title=ERROR_HEADER,
-                    description=f"Пользователь {member.mention} уже состоит в {band_role.mention}!",
+                    description=f"Пользователь {member_to_assign.mention} уже состоит в {band_role.mention}!",
                     color=nextcord.Color.red()
                 ), ephemeral=True)
         elif action == "remove":
-            if band_role in member.roles:
-                await member.remove_roles(band_role)
+            if band_role in member_to_assign.roles:
+                await member_to_assign.remove_roles(band_role)
                 await interaction.response.send_message(embed=nextcord.Embed(
                     title=BAND_ROLE_REMOVED,
-                    description=f"Ковбой {member.mention} лишился членства в {band_role.mention}. Теперь он "
+                    description=f"Ковбой {member_to_assign.mention} лишился членства в {band_role.mention}. Теперь он "
                                 f"одиночка, которому никто не прикроет спину во время скитаний по прериям.\n\n "
                                 f"*Членство отнял предводитель банды {interaction.user.mention}*",
                     color=nextcord.Color.green()
                 ))
-                logging.info(f"Участник {member.display_name} исключен из {band_role.name}, "
+                logging.info(f"Участник {member_to_assign.display_name} исключен из {band_role.name}, "
                              f"его выгнал предводитель банды {interaction.user.display_name}.")
             else:
                 await interaction.response.send_message(embed=nextcord.Embed(
                     title=ERROR_HEADER,
-                    description=f"Пользователя {member.mention} не является членом {band_role.mention}, "
+                    description=f"Пользователя {member_to_assign.mention} не является членом {band_role.mention}, "
                                 f"выгонять его неоткуда!",
                     color=nextcord.Color.red()
                 ), ephemeral=True)
@@ -93,22 +105,22 @@ class BandManager(commands.Cog):
     async def add(
             self,
             interaction: nextcord.Interaction,
-            member: nextcord.Member = nextcord.SlashOption(
+            member_to_assign: nextcord.Member = nextcord.SlashOption(
                 name="username",
                 description="Имя пользователя, которому вы хотите дать членство в своей банде")
     ):
-        await self.handle_role(interaction, member, action="add")
+        await self.handle_role(interaction, member_to_assign, action="add")
 
     @band.subcommand(description="Удалить участника из своей банды")
     @application_checks.has_any_role(*config.GROUP_LEADERS_ROLES)
     async def remove(
             self,
             interaction: nextcord.Interaction,
-            member: nextcord.Member = nextcord.SlashOption(
+            member_to_assign: nextcord.Member = nextcord.SlashOption(
                 name="username",
                 description="Имя пользователя, которого вы хотите исключить из своей банды")
     ):
-        await self.handle_role(interaction, member, action="remove")
+        await self.handle_role(interaction, member_to_assign, action="remove")
 
 
 def setup(client):
