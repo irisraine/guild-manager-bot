@@ -67,12 +67,24 @@ class SoloManager(commands.Cog):
 
     @solo.subcommand(description="Выдать участнику роль 'Соло сессия'")
     @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
-    async def add(self, interaction: nextcord.Interaction, member: nextcord.Member):
+    async def add(
+            self,
+            interaction: nextcord.Interaction,
+            member: nextcord.Member = nextcord.SlashOption(
+                name="username",
+                description="Имя пользователя, которому вы хотите предоставить роль 'Соло сессия'")
+    ):
         await self.handle_role(interaction, member, action="add")
 
     @solo.subcommand(description="Снять с участника роль 'Соло сессия'")
     @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
-    async def remove(self, interaction: nextcord.Interaction, member: nextcord.Member):
+    async def remove(
+            self,
+            interaction: nextcord.Interaction,
+            member: nextcord.Member = nextcord.SlashOption(
+                name="username",
+                description="Имя пользователя, которого вы хотите лишить роли 'Соло сессия'")
+    ):
         await self.handle_role(interaction, member, action="remove")
 
 
