@@ -1,7 +1,7 @@
 from collections import deque
 from datetime import datetime, timedelta
 import nextcord
-from nextcord.ext import commands, tasks
+from nextcord.ext import commands, tasks, application_checks
 import requests
 import re
 import logging
@@ -10,12 +10,13 @@ import engine.utils as utils
 import engine.config as config
 
 intents = nextcord.Intents.all()
-client = commands.Bot(command_prefix='&', intents=intents)
+client = commands.Bot(command_prefix='&', intents=intents, default_guild_ids=[config.GUILD_ID])
 
 COMMENTS_THREAD_NAME = "💬 Оставить комментарии"
 GREETING_BOT_MESSAGE = "Создана ветка обсуждения"
 MUTE_HEADER_MESSAGE = '❌ Здравствуйте, вам бан! ❌'
 GIF_WARNING_HEADER_MESSAGE = '💢 It\'s time to stop! 💢'
+ERROR_HEADER = "Ошибка"
 MUTE_REASONS = {'SPAM': "спамил картинками",
                 'NSFW': "постил непотребства"}
 MUTE_DESCRIPTION_MESSAGE = "Теперь он улетает в мут, хорошенько подумать о своем поведении!"
@@ -167,7 +168,7 @@ async def check_gifs(message, message_images_urls):
             warning = nextcord.Embed(
                     title=GIF_WARNING_HEADER_MESSAGE,
                     description=f"Уважаемый {message.author.mention}! {GIF_WARNING_DESCRIPTION_MESSAGE}",
-                    colour=nextcord.Colour.from_rgb(255, 0, 0))
+                    colour=nextcord.Color.red())
             if users_gifs[user_id].get('warning_id'):
                 previous_warning_id = users_gifs[user_id].get('warning_id')
                 previous_warning_message = await safe_fetch_message(previous_warning_id)
@@ -214,7 +215,7 @@ async def on_member_update(before, after):
             mute_info = nextcord.Embed(
                 title=MUTE_HEADER_MESSAGE,
                 description=f'Абоба {after.mention} {reason_for_muting}. {MUTE_DESCRIPTION_MESSAGE}',
-                colour=nextcord.Colour.from_rgb(255, 0, 0)
+                colour=nextcord.Color.red()
             )
             await channel.send(embed=mute_info)
             muted_users.pop(after.id, None)
@@ -258,7 +259,7 @@ async def static_banner(ctx):
     await ctx.send(
         embed=nextcord.Embed(
             description=f"Динамический баннер отключен.",
-            colour=nextcord.Colour.from_rgb(255, 0, 0))
+            colour=nextcord.Color.red())
     )
     logging.info('Динамический баннер отключен.')
 
@@ -270,7 +271,7 @@ async def dynamic_banner(ctx):
     await ctx.send(
         embed=nextcord.Embed(
             description=f"Динамический баннер активирован.",
-            colour=nextcord.Colour.from_rgb(255, 0, 0))
+            colour=nextcord.Color.red())
     )
     logging.info('Динамический баннер активирован.')
 
@@ -289,7 +290,7 @@ async def toggle_gif_limits(ctx):
     await ctx.send(
         embed=nextcord.Embed(
             description=f"Ограничение на использование гифок {status}.",
-            colour=nextcord.Colour.from_rgb(255, 0, 0))
+            colour=nextcord.Color.red())
     )
     logging.info(f'Ограничение на использование гифок {status}.')
 
@@ -304,20 +305,20 @@ async def toggle_extension(ctx, extension: str):
             await ctx.send(
                 embed=nextcord.Embed(
                     description=f"Расширение {extension} отключено.",
-                    colour=nextcord.Colour.from_rgb(255, 0, 0)))
+                    colour=nextcord.Color.red()))
             logging.info(f'Расширение {extension} отключено.')
         else:
             client.load_extension(extension_name)
             await ctx.send(
                 embed=nextcord.Embed(
                     description=f"Расширение {extension} успешно активировано.",
-                    colour=nextcord.Colour.from_rgb(255, 0, 0)))
+                    colour=nextcord.Color.red()))
             logging.info(f'Расширение {extension} успешно активировано.')
     except Exception as e:
         await ctx.send(
             embed=nextcord.Embed(
                 description=f"Ошибка при попытке загрузки расширения {extension}.",
-                colour=nextcord.Colour.from_rgb(255, 0, 0)))
+                colour=nextcord.Color.red()))
         logging.error(f'Ошибка при попытке загрузки расширения {extension}. Дополнительная информация: {e}')
 
 
@@ -329,9 +330,20 @@ async def permission_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send(
             embed=nextcord.Embed(
-                title="Ошибка",
-                description="Эта команда доступна только администраторам.",
-                colour=nextcord.Colour.from_rgb(255, 0, 0))
+                title=ERROR_HEADER,
+                description="Эта команда доступна только администрации.",
+                colour=nextcord.Color.red())
+        )
+
+
+@client.event
+async def on_application_command_error(interaction: nextcord.Interaction, error):
+    if isinstance(error, application_checks.ApplicationMissingAnyRole):
+        await interaction.response.send_message(
+            embed=nextcord.Embed(
+                title=ERROR_HEADER,
+                description="Эта команда доступна только администрации и предводителям банд",
+                colour=nextcord.Color.red()), ephemeral=True
         )
 
 

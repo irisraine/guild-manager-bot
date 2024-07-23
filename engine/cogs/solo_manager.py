@@ -1,62 +1,79 @@
 import nextcord
-from nextcord.ext import commands
+from nextcord.ext import commands, application_checks
 import logging
 import engine.config as config
 
-ERROR_HEADER = "Ошибка!"
-SOLO_MANAGER_USAGE_RESTRICTION = ("Выдавать гражданство славного города Подфайловска "
-                                  "могут только админы, маршалы и предводители банд!")
-ROLE_SET = "✅ Роль выдана"
-ROLE_REMOVED = "❌ Роль снята"
+ERROR_HEADER = "Ошибка"
+UNABLE_TO_ASSIGN_ROLE_TO_BOT = "Невозможно назначать или снимать роли у ботов!"
+SOLO_ROLE_SET = "✅ Роль выдана"
+SOLO_ROLE_REMOVED = "❌ Роль снята"
 
 
 class SoloManager(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
-    async def solo(self, ctx, username: str):
-        if not (ctx.author.guild_permissions.administrator or
-                any(role.id in [config.MODERATOR_ROLE] + config.GROUP_LEADERS_ROLES for role in ctx.author.roles)):
-            await ctx.send(embed=nextcord.Embed(
+    @nextcord.slash_command()
+    async def solo(self, interaction: nextcord.Interaction):
+        pass
+
+    async def handle_role(self, interaction: nextcord.Interaction, member: nextcord.Member, action: str):
+        if member.bot:
+            await interaction.response.send_message(embed=nextcord.Embed(
                 title=ERROR_HEADER,
-                description=SOLO_MANAGER_USAGE_RESTRICTION,
+                description=UNABLE_TO_ASSIGN_ROLE_TO_BOT,
                 color=nextcord.Color.red()
-            ))
+            ), ephemeral=True)
             return
 
-        member = nextcord.utils.get(ctx.guild.members, name=username)
-        role = nextcord.utils.get(ctx.guild.roles, id=config.SOLO_SESSION_ROLE)
-        if not member:
-            await ctx.send(embed=nextcord.Embed(
-                title=ERROR_HEADER,
-                description=f"Пользователь с именем {username} не присутствует на сервере.",
-                color=nextcord.Color.red()
-            ))
-            return
+        solo_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_SESSION_ROLE)
+        if action == "add":
+            if solo_role not in member.roles:
+                await member.add_roles(solo_role)
+                await interaction.response.send_message(embed=nextcord.Embed(
+                    title=SOLO_ROLE_SET,
+                    description=f"Ковбой {member.mention} получает роль {solo_role.mention} "
+                                f"и триумфально въезжает в город Подфайловск, "
+                                f"становясь его полноправным гражданином!\n\n "
+                                f"*Роль выдал {interaction.user.mention}*",
+                    color=nextcord.Color.green()
+                ))
+                logging.info(f"Участник {member.display_name} получил роль соло сессии, "
+                             f"ee выдал модератор {interaction.user.display_name}.")
+            else:
+                await interaction.response.send_message(embed=nextcord.Embed(
+                    title=ERROR_HEADER,
+                    description=f"Пользователь {member.mention} уже имеет роль {solo_role.mention}!",
+                    color=nextcord.Color.red()
+                ), ephemeral=True)
+        elif action == "remove":
+            if solo_role in member.roles:
+                await member.remove_roles(solo_role)
+                await interaction.response.send_message(embed=nextcord.Embed(
+                    title=SOLO_ROLE_REMOVED,
+                    description=f"Ковбой {member.mention} лишился роли {solo_role.mention}, а вместе с ней "
+                                f"и гражданства города Подфайловска, и был вынужден покинуть его.\n\n "
+                                f"*Роль снял {interaction.user.mention}*",
+                    color=nextcord.Color.green()
+                ))
+                logging.info(f"C участника {member.display_name} снята роль соло сессии, "
+                             f"ее забрал модератор {interaction.user.display_name}.")
+            else:
+                await interaction.response.send_message(embed=nextcord.Embed(
+                    title=ERROR_HEADER,
+                    description=f"У пользователя {member.mention} нет роли {solo_role.mention}, снимать с него нечего!",
+                    color=nextcord.Color.red()
+                ), ephemeral=True)
 
-        if role in member.roles:
-            await member.remove_roles(role)
-            await ctx.send(embed=nextcord.Embed(
-                title=ROLE_REMOVED,
-                description=f"Ковбой {member.mention} лишился роли {role.mention}, а вместе с ней и гражданства "
-                            f"города Подфайловска, и был вынужден покинуть его.\n\n "
-                            f"*Роль снял {ctx.author.mention}*",
-                color=nextcord.Color.green()
-            ))
-            logging.info(f"C участника {username} снята роль соло сессии, "
-                         f"ее забрал модератор {ctx.author.display_name}.")
-        else:
-            await member.add_roles(role)
-            await ctx.send(embed=nextcord.Embed(
-                title=ROLE_SET,
-                description=f"Ковбой {member.mention} получает роль {role.mention} "
-                            f"и триумфально въезжает в город Подфайловск, становясь его полноправным гражданином!\n\n "
-                            f"*Роль выдал {ctx.author.mention}*",
-                color=nextcord.Color.green()
-            ))
-            logging.info(f"Участник {username} получил роль соло сессии, "
-                         f"ee выдал модератор {ctx.author.display_name}.")
+    @solo.subcommand(description="Выдать участнику роль 'Соло сессия'")
+    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
+    async def add(self, interaction: nextcord.Interaction, member: nextcord.Member):
+        await self.handle_role(interaction, member, action="add")
+
+    @solo.subcommand(description="Снять с участника роль 'Соло сессия'")
+    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
+    async def remove(self, interaction: nextcord.Interaction, member: nextcord.Member):
+        await self.handle_role(interaction, member, action="remove")
 
 
 def setup(client):

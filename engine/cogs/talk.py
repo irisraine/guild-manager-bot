@@ -40,7 +40,7 @@ class MessagePanel(nextcord.ui.View):
             await interaction.response.send_message(
                 embed=nextcord.Embed(
                     description=TALK_PANEL_USAGE_RESTRICTION,
-                    colour=nextcord.Colour.from_rgb(255, 0, 0)),
+                    colour=nextcord.Color.red()),
                 ephemeral=True)
             return False
 
@@ -62,7 +62,7 @@ class Talk(commands.Cog):
         await ctx.send(
             embed=nextcord.Embed(
                 description=TALK_PANEL_INITIAL_MESSAGE,
-                colour=nextcord.Colour.from_rgb(255, 0, 0)),
+                colour=nextcord.Color.red()),
             view=MessagePanel()
         )
 
