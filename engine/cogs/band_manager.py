@@ -20,7 +20,7 @@ class BandManager(commands.Cog):
     async def band(self, interaction: nextcord.Interaction):
         pass
 
-    async def handle_role(self, interaction: nextcord.Interaction, member_to_assign: nextcord.Member, action: str):
+    async def assign_role(self, interaction: nextcord.Interaction, member_to_assign: nextcord.Member, action: str):
         if member_to_assign.bot:
             await interaction.response.send_message(embed=nextcord.Embed(
                 title=ERROR_HEADER,
@@ -109,7 +109,7 @@ class BandManager(commands.Cog):
                 name="username",
                 description="Имя пользователя, которому вы хотите дать членство в своей банде")
     ):
-        await self.handle_role(interaction, member_to_assign, action="add")
+        await self.assign_role(interaction, member_to_assign, action="add")
 
     @band.subcommand(description="Удалить участника из своей банды")
     @application_checks.has_any_role(*config.GROUP_LEADERS_ROLES)
@@ -120,7 +120,7 @@ class BandManager(commands.Cog):
                 name="username",
                 description="Имя пользователя, которого вы хотите исключить из своей банды")
     ):
-        await self.handle_role(interaction, member_to_assign, action="remove")
+        await self.assign_role(interaction, member_to_assign, action="remove")
 
 
 def setup(client):

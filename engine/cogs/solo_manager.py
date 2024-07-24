@@ -17,7 +17,7 @@ class SoloManager(commands.Cog):
     async def solo(self, interaction: nextcord.Interaction):
         pass
 
-    async def handle_role(self, interaction: nextcord.Interaction, member_to_assign: nextcord.Member, action: str):
+    async def assign_role(self, interaction: nextcord.Interaction, member_to_assign: nextcord.Member, action: str):
         if member_to_assign.bot:
             await interaction.response.send_message(embed=nextcord.Embed(
                 title=ERROR_HEADER,
@@ -74,7 +74,7 @@ class SoloManager(commands.Cog):
                 name="username",
                 description="Имя пользователя, которому вы хотите предоставить роль 'Соло сессия'")
     ):
-        await self.handle_role(interaction, member_to_assign, action="add")
+        await self.assign_role(interaction, member_to_assign, action="add")
 
     @solo.subcommand(description="Снять с участника роль 'Соло сессия'")
     @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
@@ -85,7 +85,7 @@ class SoloManager(commands.Cog):
                 name="username",
                 description="Имя пользователя, которого вы хотите лишить роли 'Соло сессия'")
     ):
-        await self.handle_role(interaction, member_to_assign, action="remove")
+        await self.assign_role(interaction, member_to_assign, action="remove")
 
 
 def setup(client):

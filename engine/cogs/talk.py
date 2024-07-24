@@ -1,6 +1,6 @@
 import nextcord
 from nextcord import Interaction
-from nextcord.ext import commands
+from nextcord.ext import commands, application_checks
 import engine.config as config
 
 
@@ -57,9 +57,10 @@ class Talk(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
-    async def say(self, ctx):
-        await ctx.send(
+    @nextcord.slash_command(description="Отправить сообщение от лица бота")
+    @application_checks.has_role(config.ADMIN_ROLE)
+    async def say(self, interaction: nextcord.Interaction):
+        await interaction.response.send_message(
             embed=nextcord.Embed(
                 description=TALK_PANEL_INITIAL_MESSAGE,
                 colour=nextcord.Color.red()),

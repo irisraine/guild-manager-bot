@@ -166,9 +166,9 @@ async def check_gifs(message, message_images_urls):
         cooldown = timedelta(seconds=config.GIF_COOLDOWN_DURATION)
         if user_id in users_gifs and current_time - users_gifs[user_id].get('time') < cooldown:
             warning = nextcord.Embed(
-                    title=GIF_WARNING_HEADER_MESSAGE,
-                    description=f"Уважаемый {message.author.mention}! {GIF_WARNING_DESCRIPTION_MESSAGE}",
-                    colour=nextcord.Color.red())
+                title=GIF_WARNING_HEADER_MESSAGE,
+                description=f"Уважаемый {message.author.mention}! {GIF_WARNING_DESCRIPTION_MESSAGE}",
+                colour=nextcord.Color.red())
             if users_gifs[user_id].get('warning_id'):
                 previous_warning_id = users_gifs[user_id].get('warning_id')
                 previous_warning_message = await safe_fetch_message(previous_warning_id)
@@ -249,45 +249,50 @@ async def purge_gif_warnings():
                 users_gifs[user_id]['warning_id'] = None
 
 
-@client.command()
-@commands.has_permissions(administrator=True)
-async def static_banner(ctx):
-    guild = client.get_guild(config.GUILD_ID)
-    banner_member_counter.stop()
-    banner_binary_data = utils.get_banner_binary_data(config.BANNER_IMAGE)
-    await guild.edit(banner=banner_binary_data)
-    await ctx.send(
+@client.slash_command(description="Управление динамическим баннером сервера")
+@application_checks.has_role(config.ADMIN_ROLE)
+async def dynamic_banner(
+        interaction: nextcord.Interaction,
+        toggle: str = nextcord.SlashOption(
+            name="toggle",
+            choices=["on", "off"],
+        )):
+    if toggle == "on":
+        if not banner_member_counter.is_running():
+            banner_member_counter.start()
+    elif toggle == "off":
+        guild = client.get_guild(config.GUILD_ID)
+        banner_member_counter.stop()
+        banner_binary_data = utils.get_banner_binary_data(config.BANNER_IMAGE)
+        await guild.edit(banner=banner_binary_data)
+    status = "активирован" if toggle == "on" else "отключен"
+    await interaction.response.send_message(
         embed=nextcord.Embed(
-            description=f"Динамический баннер отключен.",
+            description=f"Динамический баннер {status}.",
             colour=nextcord.Color.red())
     )
-    logging.info('Динамический баннер отключен.')
+    logging.info(f"Динамический баннер {status}.")
 
 
-@client.command()
-@commands.has_permissions(administrator=True)
-async def dynamic_banner(ctx):
-    banner_member_counter.start()
-    await ctx.send(
-        embed=nextcord.Embed(
-            description=f"Динамический баннер активирован.",
-            colour=nextcord.Color.red())
-    )
-    logging.info('Динамический баннер активирован.')
-
-
-@client.command()
-@commands.has_permissions(administrator=True)
-async def toggle_gif_limits(ctx):
+@client.slash_command(description="Ограничения на использование гифок")
+@application_checks.has_role(config.ADMIN_ROLE)
+async def gif_limits(
+        interaction: nextcord.Interaction,
+        toggle: str = nextcord.SlashOption(
+            name="toggle",
+            choices=["on", "off"],
+        )):
     global is_gif_limits
-    is_gif_limits = not is_gif_limits
-    if is_gif_limits:
-        purge_gif_warnings.start()
-    else:
+    if toggle == "on":
+        is_gif_limits = True
+        if not purge_gif_warnings.is_running():
+            purge_gif_warnings.start()
+    elif toggle == "off":
+        is_gif_limits = False
         purge_gif_warnings.stop()
         users_gifs.clear()
-    status = "активировано" if is_gif_limits else "отключено"
-    await ctx.send(
+    status = "активировано" if toggle == "on" else "отключено"
+    await interaction.response.send_message(
         embed=nextcord.Embed(
             description=f"Ограничение на использование гифок {status}.",
             colour=nextcord.Color.red())
@@ -295,54 +300,41 @@ async def toggle_gif_limits(ctx):
     logging.info(f'Ограничение на использование гифок {status}.')
 
 
-@client.command()
-@commands.has_permissions(administrator=True)
-async def toggle_extension(ctx, extension: str):
+@client.slash_command(description="Загрузить или выгрузить расширение")
+@application_checks.has_role(config.ADMIN_ROLE)
+async def toggle_extension(interaction: nextcord.Interaction, extension: str):
     extension_name = f'engine.cogs.{extension}'
     try:
         if extension_name in client.extensions:
             client.unload_extension(extension_name)
-            await ctx.send(
+            await interaction.response.send_message(
                 embed=nextcord.Embed(
                     description=f"Расширение {extension} отключено.",
                     colour=nextcord.Color.red()))
             logging.info(f'Расширение {extension} отключено.')
         else:
             client.load_extension(extension_name)
-            await ctx.send(
+            await interaction.response.send_message(
                 embed=nextcord.Embed(
                     description=f"Расширение {extension} успешно активировано.",
                     colour=nextcord.Color.red()))
             logging.info(f'Расширение {extension} успешно активировано.')
     except Exception as e:
-        await ctx.send(
+        await interaction.response.send_message(
             embed=nextcord.Embed(
                 description=f"Ошибка при попытке загрузки расширения {extension}.",
                 colour=nextcord.Color.red()))
         logging.error(f'Ошибка при попытке загрузки расширения {extension}. Дополнительная информация: {e}')
 
 
-@toggle_extension.error
-@toggle_gif_limits.error
-@static_banner.error
-@dynamic_banner.error
-async def permission_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send(
-            embed=nextcord.Embed(
-                title=ERROR_HEADER,
-                description="Эта команда доступна только администрации.",
-                colour=nextcord.Color.red())
-        )
-
-
 @client.event
 async def on_application_command_error(interaction: nextcord.Interaction, error):
-    if isinstance(error, application_checks.ApplicationMissingAnyRole):
+    handled_errors = (application_checks.ApplicationMissingAnyRole, application_checks.ApplicationMissingRole)
+    if isinstance(error, handled_errors):
         await interaction.response.send_message(
             embed=nextcord.Embed(
                 title=ERROR_HEADER,
-                description="Эта команда доступна только администрации и предводителям банд",
+                description="У вас недостаточно прав для использования данной команды!",
                 colour=nextcord.Color.red()), ephemeral=True
         )
 

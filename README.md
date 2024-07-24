@@ -50,15 +50,14 @@ The image must have a resolution of 1024x576 pixels.
 
 ## Commands
 
-- `&dynamic_banner` - activate dynamic banner. After using this command, bot will automatically update the server banner with 
+- `/dynamic_banner <on/off>` - activate or deactivate dynamic banner. After using this command, bot will automatically update the server banner with 
 info of overall server members number. Updating period is set to 10 minutes.
-- `&static_banner` - turn off dynamic banner.
-- `&toggle_gif_limits` - turn on/off gif images limitation function.
+- `/gif_limits <on/off>` - turn on/off gif images limitation function.
 
 ## Extensions
 
 The bot can obtain additional functionality via using extensions located in the `cogs` folder. Extensions are loading automatically at startup. 
-Also, you can manually load or unload specific extensions use `&toggle_extension <extension_name>` command.
+Also, you can manually load or unload specific extensions use `/toggle_extension <extension_name>` command.
 
 ## Limitations
 
