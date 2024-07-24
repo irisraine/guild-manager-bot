@@ -87,7 +87,7 @@ async def delete_message(message):
         logging.warning("Сообщение не найдено, либо оно уже было удалено ранее.")
     except Exception as e:
         logging.error(f"При попытке удаления сообщения возникла непредвиденная ошибка: {e}.")
-        return None
+        return
 
 
 async def safe_fetch_message(message_id):
@@ -97,10 +97,10 @@ async def safe_fetch_message(message_id):
         return fetched_message
     except nextcord.NotFound:
         logging.info("Сообщение с предупреждением отсутствует, видимо, оно было ранее удалено вручную.")
-        return None
+        return
     except Exception as e:
         logging.error(f"При попытке получения сообщения возникла непредвиденная ошибка: {e}.")
-        return None
+        return
 
 
 async def create_thread(message):
@@ -112,6 +112,7 @@ async def create_thread(message):
             auto_archive_duration=60
         )
         await thread.send(GREETING_BOT_MESSAGE)
+        logging.info(f"Создан тред для сообщения id:{message.id}, содержащим медиаконтент")
     except nextcord.errors.HTTPException as e:
         logging.error(f"При попытке создания треда возникла ошибка сетевого соединения: {e}.")
     except Exception as e:
@@ -154,23 +155,23 @@ async def check_nsfw(message, message_images_urls):
 
 
 async def check_gifs(message, message_images_urls):
-    gif_extension_pattern = r"tenor\.com|giphy\.com|\.gif($|\?|&)"
-    if any(list(map(lambda image_url: re.search(gif_extension_pattern, image_url), message_images_urls))):
+    gif_extension_pattern = re.compile(r"tenor\.com|giphy\.com|\.gif($|\?|&)")
+    if any(gif_extension_pattern.search(image_url) for image_url in message_images_urls):
         global users_gifs
         user_id = message.author.id
         current_time = datetime.now()
         cooldown = timedelta(seconds=config.GIF_COOLDOWN_DURATION)
         if user_id in users_gifs and current_time - users_gifs[user_id].get('time') < cooldown:
-            warning = nextcord.Embed(
-                title=GIF_WARNING_HEADER_MESSAGE,
-                description=f"Уважаемый {message.author.mention}! {GIF_WARNING_DESCRIPTION_MESSAGE}",
-                colour=nextcord.Color.red())
             if users_gifs[user_id].get('warning_id'):
                 previous_warning_id = users_gifs[user_id].get('warning_id')
                 previous_warning_message = await safe_fetch_message(previous_warning_id)
                 if previous_warning_message:
                     await delete_message(previous_warning_message)
-            warning_message = await message.channel.send(embed=warning)
+            warning_message = await message.channel.send(embed=nextcord.Embed(
+                title=GIF_WARNING_HEADER_MESSAGE,
+                description=f"Уважаемый {message.author.mention}! {GIF_WARNING_DESCRIPTION_MESSAGE}",
+                colour=nextcord.Color.red())
+            )
             users_gifs[user_id]['warning_id'] = warning_message.id
             await delete_message(message)
         else:
@@ -193,7 +194,6 @@ async def on_message(message):
                 await check_gifs(message, message_media_urls['images'])
     if message_media_urls['images'] or message_media_urls['videos']:
         await create_thread(message)
-        logging.info(f"Создан тред для сообщения с медиаконтентом {message_media_urls}")
 
     await client.process_commands(message)
 
