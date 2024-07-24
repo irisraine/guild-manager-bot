@@ -17,6 +17,7 @@ GREETING_BOT_MESSAGE = "Создана ветка обсуждения"
 MUTE_HEADER_MESSAGE = '❌ Здравствуйте, вам бан! ❌'
 GIF_WARNING_HEADER_MESSAGE = '💢 It\'s time to stop! 💢'
 ERROR_HEADER = "Ошибка"
+ERROR_MESSAGE = "У вас недостаточно прав для использования данной команды!"
 MUTE_REASONS = {'SPAM': "спамил картинками",
                 'NSFW': "постил непотребства"}
 MUTE_DESCRIPTION_MESSAGE = "Теперь он улетает в мут, хорошенько подумать о своем поведении!"
@@ -33,46 +34,39 @@ members_count = 0
 voice_count = 0
 
 
-def get_attached_images_urls(message):
+def get_attached_media(message):
+    url_pattern = re.compile(r'(https?://\S+)')
+    youtube_url_pattern = re.compile(r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/.+')
+    gif_vaults_domains = ['media1.tenor.com', 'tenor.com/view', 'giphy.com']
+
     attached_images_urls = []
+    attached_videos_urls = []
     for attachment in message.attachments:
-        if attachment.content_type and attachment.content_type.startswith('image/'):
-            attached_images_urls.append(attachment.url)
-    return attached_images_urls
-
-
-def get_textarea_images_urls(message):
-    url_pattern = re.compile(r'(http|https)://\S+')
-    domains = ['media1.tenor.com', 'tenor.com/view', 'giphy.com']
-    message_content_as_list = message.content.split("\n")
-    urls = [url_match.group() for url_match
-            in list(map(lambda item: url_pattern.search(item), message_content_as_list))
-            if url_match]
-    textarea_urls = []
-    for url in urls:
+        if attachment.content_type:
+            if attachment.content_type.startswith('image/'):
+                attached_images_urls.append(attachment.url)
+            elif attachment.content_type.startswith('video/'):
+                attached_videos_urls.append(attachment.url)
+    message_contents = message.content.split("\n")
+    message_urls = [url_match.group() for item in message_contents if (url_match := url_pattern.search(item))]
+    attached_videos_urls.extend(
+        [url for url in message_urls if youtube_url_pattern.search(url)]
+    )
+    for url in message_urls:
         try:
-            if not domains[0] in url:
-                response = requests.head(url, timeout=5)
-                if response.status_code == 200:
-                    if 'image' in response.headers.get('content-type') or (domains[1] in url or domains[2] in url):
-                        textarea_urls.append(url)
-            else:
-                response = requests.get(url, timeout=5)
-                if response.status_code == 200:
-                    textarea_urls.append(url)
+            response = requests.get(url, timeout=5) if gif_vaults_domains[0] in url else requests.head(url, timeout=5)
+            if response.status_code == 200:
+                content_type = response.headers.get('content-type', '')
+                if 'image' in content_type or any(domain in url for domain in gif_vaults_domains[1:]):
+                    attached_images_urls.append(url)
         except requests.exceptions.RequestException:
             continue
         except Exception as e:
             logging.error(f"Неизвестная ошибка при обработке ссылки. Дополнительная информация: {e}")
-            continue
-    return textarea_urls
-
-
-def has_attached_videos(message):
-    youtube_url_pattern = re.compile(r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/.+')
-    has_video_attachment = any(attachment.content_type.startswith('video/') for attachment in message.attachments)
-    has_youtube_link = bool(youtube_url_pattern.search(message.content))
-    return has_video_attachment or has_youtube_link
+    return {
+        'images': attached_images_urls,
+        'videos': attached_videos_urls
+    }
 
 
 async def mute_user(message, reason):
@@ -92,7 +86,7 @@ async def delete_message(message):
     except nextcord.errors.NotFound:
         logging.warning("Сообщение не найдено, либо оно уже было удалено ранее.")
     except Exception as e:
-        logging.error(f"При попытке удаления сообщения возникла неопределенная ошибка: {e}.")
+        logging.error(f"При попытке удаления сообщения возникла непредвиденная ошибка: {e}.")
         return None
 
 
@@ -105,11 +99,13 @@ async def safe_fetch_message(message_id):
         logging.info("Сообщение с предупреждением отсутствует, видимо, оно было ранее удалено вручную.")
         return None
     except Exception as e:
-        logging.error(f"При попытке получения сообщения возникла неопределенная ошибка: {e}.")
+        logging.error(f"При попытке получения сообщения возникла непредвиденная ошибка: {e}.")
         return None
 
 
 async def create_thread(message):
+    if config.ALLOWED_CHANNELS and message.channel.id not in config.ALLOWED_CHANNELS:
+        return
     try:
         thread = await message.create_thread(
             name=COMMENTS_THREAD_NAME,
@@ -117,9 +113,9 @@ async def create_thread(message):
         )
         await thread.send(GREETING_BOT_MESSAGE)
     except nextcord.errors.HTTPException as e:
-        logging.error(f"При попытке создания треда возникла следующая ошибка: {e}.")
+        logging.error(f"При попытке создания треда возникла ошибка сетевого соединения: {e}.")
     except Exception as e:
-        logging.error(f"При попытке создания треда возникла неопределенная ошибка: {e}.")
+        logging.error(f"При попытке создания треда возникла непредвиденная ошибка: {e}.")
 
 
 async def check_spam(message):
@@ -186,21 +182,19 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    message_images_urls = get_textarea_images_urls(message) + get_attached_images_urls(message)
-    if message_images_urls:
+    message_media_urls = get_attached_media(message)
+    print(message_media_urls)
+    if message_media_urls['images']:
         if not message.author.guild_permissions.administrator:
             is_spam = await check_spam(message)
-            is_nsfw = await check_nsfw(message, message_images_urls)
+            is_nsfw = await check_nsfw(message, message_media_urls['images'])
             if is_spam or is_nsfw:
                 return
             if is_gif_limits and message.channel.id == config.COMMON_DISCUSSION_CHANNEL:
-                await check_gifs(message, message_images_urls)
-        if config.ALLOWED_CHANNELS and message.channel.id not in config.ALLOWED_CHANNELS:
-            return
-        logging.info(f"Создан тред для изображения {message_images_urls[0]}")
+                await check_gifs(message, message_media_urls['images'])
+    if message_media_urls['images'] or message_media_urls['videos']:
         await create_thread(message)
-    elif has_attached_videos(message):
-        await create_thread(message)
+        logging.info(f"Создан тред для сообщения с медиаконтентом {message_media_urls}")
 
     await client.process_commands(message)
 
@@ -334,9 +328,11 @@ async def on_application_command_error(interaction: nextcord.Interaction, error)
         await interaction.response.send_message(
             embed=nextcord.Embed(
                 title=ERROR_HEADER,
-                description="У вас недостаточно прав для использования данной команды!",
+                description=ERROR_MESSAGE,
                 colour=nextcord.Color.red()), ephemeral=True
         )
+    else:
+        logging.error(f"При использовании команды произошла непредвиденная ошибка: {error}")
 
 
 @client.event
