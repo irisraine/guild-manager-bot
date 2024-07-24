@@ -63,7 +63,7 @@ class Talk(commands.Cog):
         await interaction.response.send_message(
             embed=nextcord.Embed(
                 description=TALK_PANEL_INITIAL_MESSAGE,
-                colour=nextcord.Color.red()),
+                colour=nextcord.Color.green()),
             view=MessagePanel()
         )
 
