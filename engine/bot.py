@@ -247,8 +247,8 @@ async def purge_gif_warnings():
 async def dynamic_banner(
         interaction: nextcord.Interaction,
         toggle: str = nextcord.SlashOption(
-            name="toggle",
-            choices=["on", "off"],
+            description="Отображение динамического баннера",
+            choices={"активировать": "on", "отключить": "off"}
         )):
     if toggle == "on":
         if not banner_member_counter.is_running():
@@ -272,8 +272,8 @@ async def dynamic_banner(
 async def gif_limits(
         interaction: nextcord.Interaction,
         toggle: str = nextcord.SlashOption(
-            name="toggle",
-            choices=["on", "off"],
+            description="Статус ограничений",
+            choices={"установить": "on", "отменить": "off"}
         )):
     global is_gif_limits
     if toggle == "on":
@@ -284,7 +284,7 @@ async def gif_limits(
         is_gif_limits = False
         purge_gif_warnings.stop()
         users_gifs.clear()
-    status = "активировано" if toggle == "on" else "отключено"
+    status = "установлено" if toggle == "on" else "отменено"
     await interaction.response.send_message(
         embed=nextcord.Embed(
             description=f"Ограничение на использование гифок {status}.",
