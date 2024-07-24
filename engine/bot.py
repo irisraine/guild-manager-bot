@@ -183,7 +183,6 @@ async def on_message(message):
         return
 
     message_media_urls = get_attached_media(message)
-    print(message_media_urls)
     if message_media_urls['images']:
         if not message.author.guild_permissions.administrator:
             is_spam = await check_spam(message)
