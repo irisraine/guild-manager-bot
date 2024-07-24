@@ -16,11 +16,20 @@ class BandManager(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @nextcord.slash_command()
-    async def band(self, interaction: nextcord.Interaction):
-        pass
-
-    async def assign_role(self, interaction: nextcord.Interaction, member_to_assign: nextcord.Member, action: str):
+    @nextcord.slash_command(description="Управление составом своей банды")
+    @application_checks.has_any_role(*config.GROUP_LEADERS_ROLES)
+    async def band(
+            self,
+            interaction: nextcord.Interaction,
+            action: str = nextcord.SlashOption(
+                name="action",
+                description="Вы можете добавить пользователя в свою банду, либо исключить его",
+                choices={"добавить в банду": "add", "исключить из банды": "remove"}
+            ),
+            member_to_assign: nextcord.Member = nextcord.SlashOption(
+                name="username",
+                description="Укажите имя пользователя"),
+    ):
         if member_to_assign.bot:
             await interaction.response.send_message(embed=nextcord.Embed(
                 title=ERROR_HEADER,
@@ -66,9 +75,9 @@ class BandManager(commands.Cog):
                 await member_to_assign.add_roles(band_role)
                 await interaction.response.send_message(embed=nextcord.Embed(
                     title=BAND_ROLE_SET,
-                    description=f"Ковбой {member_to_assign.mention} вступает в {band_role.mention}, и вместе с новыми "
-                                f"товарищами готов взяться за дела, слава о которых "
-                                f"еще прогремит по всему Дикому Западу!\n\n "                                
+                    description=f"Ковбой {member_to_assign.mention} вступает в {band_role.mention}, и вместе с "
+                                f"новыми товарищами готов взяться за дела, слава о которых "
+                                f"еще прогремит по всему Дикому Западу!\n\n "
                                 f"*Членство выдал предводитель банды {interaction.user.mention}*",
                     color=nextcord.Color.green()
                 ))
@@ -99,28 +108,6 @@ class BandManager(commands.Cog):
                                 f"выгонять его неоткуда!",
                     color=nextcord.Color.red()
                 ), ephemeral=True)
-
-    @band.subcommand(description="Добавить участника в свою банду")
-    @application_checks.has_any_role(*config.GROUP_LEADERS_ROLES)
-    async def add(
-            self,
-            interaction: nextcord.Interaction,
-            member_to_assign: nextcord.Member = nextcord.SlashOption(
-                name="username",
-                description="Имя пользователя, которому вы хотите дать членство в своей банде")
-    ):
-        await self.assign_role(interaction, member_to_assign, action="add")
-
-    @band.subcommand(description="Удалить участника из своей банды")
-    @application_checks.has_any_role(*config.GROUP_LEADERS_ROLES)
-    async def remove(
-            self,
-            interaction: nextcord.Interaction,
-            member_to_assign: nextcord.Member = nextcord.SlashOption(
-                name="username",
-                description="Имя пользователя, которого вы хотите исключить из своей банды")
-    ):
-        await self.assign_role(interaction, member_to_assign, action="remove")
 
 
 def setup(client):

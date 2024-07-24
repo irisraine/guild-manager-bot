@@ -13,11 +13,20 @@ class SoloManager(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @nextcord.slash_command()
-    async def solo(self, interaction: nextcord.Interaction):
-        pass
-
-    async def assign_role(self, interaction: nextcord.Interaction, member_to_assign: nextcord.Member, action: str):
+    @nextcord.slash_command(description="Управление ролью 'Соло сессия'")
+    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
+    async def solo(
+            self,
+            interaction: nextcord.Interaction,
+            action: str = nextcord.SlashOption(
+                name="action",
+                description="Вы можете выдать пользователю роль 'Соло сессия', либо снять ее с него",
+                choices={"выдать роль": "add", "снять роль": "remove"}
+            ),
+            member_to_assign: nextcord.Member = nextcord.SlashOption(
+                name="username",
+                description="Укажите имя пользователя"),
+    ):
         if member_to_assign.bot:
             await interaction.response.send_message(embed=nextcord.Embed(
                 title=ERROR_HEADER,
@@ -61,31 +70,10 @@ class SoloManager(commands.Cog):
             else:
                 await interaction.response.send_message(embed=nextcord.Embed(
                     title=ERROR_HEADER,
-                    description=f"У пользователя {member_to_assign.mention} нет роли {solo_role.mention}, снимать с него нечего!",
+                    description=f"У пользователя {member_to_assign.mention} нет роли {solo_role.mention}, "
+                                f"снимать с него нечего!",
                     color=nextcord.Color.red()
                 ), ephemeral=True)
-
-    @solo.subcommand(description="Выдать участнику роль 'Соло сессия'")
-    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
-    async def add(
-            self,
-            interaction: nextcord.Interaction,
-            member_to_assign: nextcord.Member = nextcord.SlashOption(
-                name="username",
-                description="Имя пользователя, которому вы хотите предоставить роль 'Соло сессия'")
-    ):
-        await self.assign_role(interaction, member_to_assign, action="add")
-
-    @solo.subcommand(description="Снять с участника роль 'Соло сессия'")
-    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
-    async def remove(
-            self,
-            interaction: nextcord.Interaction,
-            member_to_assign: nextcord.Member = nextcord.SlashOption(
-                name="username",
-                description="Имя пользователя, которого вы хотите лишить роли 'Соло сессия'")
-    ):
-        await self.assign_role(interaction, member_to_assign, action="remove")
 
 
 def setup(client):
