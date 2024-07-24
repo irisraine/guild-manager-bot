@@ -262,7 +262,7 @@ async def dynamic_banner(
     await interaction.response.send_message(
         embed=nextcord.Embed(
             description=f"Динамический баннер {status}.",
-            colour=nextcord.Color.red())
+            colour=nextcord.Color.green())
     )
     logging.info(f"Динамический баннер {status}.")
 
@@ -303,14 +303,14 @@ async def toggle_extension(interaction: nextcord.Interaction, extension: str):
             await interaction.response.send_message(
                 embed=nextcord.Embed(
                     description=f"Расширение {extension} отключено.",
-                    colour=nextcord.Color.red()))
+                    colour=nextcord.Color.green()))
             logging.info(f'Расширение {extension} отключено.')
         else:
             client.load_extension(extension_name)
             await interaction.response.send_message(
                 embed=nextcord.Embed(
                     description=f"Расширение {extension} успешно активировано.",
-                    colour=nextcord.Color.red()))
+                    colour=nextcord.Color.green()))
             logging.info(f'Расширение {extension} успешно активировано.')
     except Exception as e:
         await interaction.response.send_message(
