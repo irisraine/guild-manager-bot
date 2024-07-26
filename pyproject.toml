@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "image-thread-manager"
+name = "guild-manager"
 version = "0.4.0"
 description = ""
 authors = ["Iris-Raine <iris.raine.darkest.star@gmail.com>"]
@@ -18,7 +18,7 @@ logging = "^0.4.9.6"
 pillow = "^10.2.0"
 
 [tool.poetry.scripts]
-image-thread-manager-bot = "engine.run:run_discord_bot"
+guild-manager-bot = "engine.run:run_discord_bot"
 
 [build-system]
 requires = ["poetry-core"]
