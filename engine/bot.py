@@ -6,7 +6,6 @@ import requests
 import re
 import logging
 from engine.content_moderator import is_image_nsfw
-import engine.utils as utils
 import engine.config as config
 
 intents = nextcord.Intents.all()
@@ -24,14 +23,12 @@ MUTE_DESCRIPTION_MESSAGE = "Теперь он улетает в мут, хоро
 GIF_WARNING_DESCRIPTION_MESSAGE = ("Ваш бесплатный пробный период использования гифок на данный момент закончился. "
                                    "Для продления насыпьте костей или сена в кормушку модераторам.")
 
+unwanted_content = False
 user_message_statistics = {}
 muted_users = {}
 
-users_gifs = {}
 is_gif_limits = False
-
-members_count = 0
-voice_count = 0
+users_gifs = {}
 
 
 def get_attached_media(message):
@@ -61,8 +58,8 @@ def get_attached_media(message):
                     attached_images_urls.append(url)
         except requests.exceptions.RequestException:
             continue
-        except Exception as e:
-            logging.error(f"Неизвестная ошибка при обработке ссылки. Дополнительная информация: {e}")
+        except Exception as error:
+            logging.error(f"Неизвестная ошибка при обработке ссылки. Дополнительная информация: {error}")
     return {
         'images': attached_images_urls,
         'videos': attached_videos_urls
@@ -85,9 +82,8 @@ async def delete_message(message):
         await message.delete()
     except nextcord.errors.NotFound:
         logging.warning("Сообщение не найдено, либо оно уже было удалено ранее.")
-    except Exception as e:
-        logging.error(f"При попытке удаления сообщения возникла непредвиденная ошибка: {e}.")
-        return
+    except Exception as error:
+        logging.error(f"При попытке удаления сообщения возникла непредвиденная ошибка: {error}.")
 
 
 async def safe_fetch_message(message_id):
@@ -97,10 +93,8 @@ async def safe_fetch_message(message_id):
         return fetched_message
     except nextcord.NotFound:
         logging.info("Сообщение с предупреждением отсутствует, видимо, оно было ранее удалено вручную.")
-        return
-    except Exception as e:
-        logging.error(f"При попытке получения сообщения возникла непредвиденная ошибка: {e}.")
-        return
+    except Exception as error:
+        logging.error(f"При попытке получения сообщения возникла непредвиденная ошибка: {error}.")
 
 
 async def create_thread(message):
@@ -113,14 +107,15 @@ async def create_thread(message):
         )
         await thread.send(GREETING_BOT_MESSAGE)
         logging.info(f"Создан тред для сообщения id:{message.id}, содержащим медиаконтент")
-    except nextcord.errors.HTTPException as e:
-        logging.error(f"При попытке создания треда возникла ошибка сетевого соединения: {e}.")
-    except Exception as e:
-        logging.error(f"При попытке создания треда возникла непредвиденная ошибка: {e}.")
+    except nextcord.errors.HTTPException as error:
+        logging.error(f"При попытке создания треда возникла ошибка сетевого соединения: {error}.")
+    except Exception as error:
+        logging.error(f"При попытке создания треда возникла непредвиденная ошибка: {error}.")
 
 
 async def check_spam(message):
     user_id = message.author.id
+    global unwanted_content
     global user_message_statistics
     global muted_users
     if user_id not in user_message_statistics:
@@ -130,6 +125,7 @@ async def check_spam(message):
         oldest_message_time = user_message_statistics[user_id].popleft()
         current_time = message.created_at.timestamp()
         if current_time - oldest_message_time <= config.TIME_LIMIT:
+            unwanted_content = True
             muted_users[user_id] = {'channel': message.channel,
                                     'reason': MUTE_REASONS['SPAM']}
             await mute_user(message, MUTE_REASONS['SPAM'])
@@ -138,20 +134,20 @@ async def check_spam(message):
                 if item.author == message.author:
                     await delete_message(item)
             user_message_statistics.pop(user_id, None)
-            return True
 
 
 async def check_nsfw(message, message_images_urls):
     user_id = message.author.id
+    global unwanted_content
     global muted_users
     for image_url in message_images_urls:
         if await is_image_nsfw(image_url):
+            unwanted_content = True
             muted_users[user_id] = {'channel': message.channel,
                                     'reason': MUTE_REASONS['NSFW']}
             await mute_user(message, MUTE_REASONS['NSFW'])
             await delete_message(message)
             logging.info(f"Изображение по адресу {image_url} содержит NSFW-контент и было удалено.")
-            return True
 
 
 async def check_gifs(message, message_images_urls):
@@ -186,9 +182,9 @@ async def on_message(message):
     message_media_urls = get_attached_media(message)
     if message_media_urls['images']:
         if not message.author.guild_permissions.administrator:
-            is_spam = await check_spam(message)
-            is_nsfw = await check_nsfw(message, message_media_urls['images'])
-            if is_spam or is_nsfw:
+            await check_spam(message)
+            await check_nsfw(message, message_media_urls['images'])
+            if unwanted_content:
                 return
             if is_gif_limits and message.channel.id == config.COMMON_DISCUSSION_CHANNEL:
                 await check_gifs(message, message_media_urls['images'])
@@ -215,23 +211,6 @@ async def on_member_update(before, after):
 
 
 @tasks.loop(minutes=10)
-async def banner_member_counter():
-    guild = client.get_guild(config.GUILD_ID)
-    global members_count, voice_count
-    current_members_count = guild.member_count
-    current_voice_count = sum(1 for member in guild.members if member.voice)
-
-    if current_members_count != members_count or current_voice_count != voice_count:
-        utils.update_banner(
-            members_count=current_members_count,
-            voice_count=current_voice_count
-        )
-        banner_binary_data = utils.get_banner_binary_data(config.BANNER_WITH_COUNTER_IMAGE)
-        await guild.edit(banner=banner_binary_data)
-        members_count, voice_count = current_members_count, current_voice_count
-
-
-@tasks.loop(minutes=10)
 async def purge_gif_warnings():
     for user_id, gif_info in users_gifs.items():
         current_warning_id = gif_info.get('warning_id')
@@ -240,31 +219,6 @@ async def purge_gif_warnings():
             if current_warning_message:
                 await delete_message(current_warning_message)
                 users_gifs[user_id]['warning_id'] = None
-
-
-@client.slash_command(description="Управление динамическим баннером сервера")
-@application_checks.has_role(config.ADMIN_ROLE)
-async def dynamic_banner(
-        interaction: nextcord.Interaction,
-        toggle: str = nextcord.SlashOption(
-            description="Отображение динамического баннера",
-            choices={"активировать": "on", "отключить": "off"}
-        )):
-    if toggle == "on":
-        if not banner_member_counter.is_running():
-            banner_member_counter.start()
-    elif toggle == "off":
-        guild = client.get_guild(config.GUILD_ID)
-        banner_member_counter.stop()
-        banner_binary_data = utils.get_banner_binary_data(config.BANNER_IMAGE)
-        await guild.edit(banner=banner_binary_data)
-    status = "активирован" if toggle == "on" else "отключен"
-    await interaction.response.send_message(
-        embed=nextcord.Embed(
-            description=f"Динамический баннер {status}.",
-            colour=nextcord.Color.green())
-    )
-    logging.info(f"Динамический баннер {status}.")
 
 
 @client.slash_command(description="Ограничения на использование гифок")
@@ -312,12 +266,12 @@ async def toggle_extension(interaction: nextcord.Interaction, extension: str):
                     description=f"Расширение {extension} успешно активировано.",
                     colour=nextcord.Color.green()))
             logging.info(f'Расширение {extension} успешно активировано.')
-    except Exception as e:
+    except Exception as error:
         await interaction.response.send_message(
             embed=nextcord.Embed(
                 description=f"Ошибка при попытке загрузки расширения {extension}.",
                 colour=nextcord.Color.red()))
-        logging.error(f'Ошибка при попытке загрузки расширения {extension}. Дополнительная информация: {e}')
+        logging.error(f'Ошибка при попытке загрузки расширения {extension}. Дополнительная информация: {error}')
 
 
 @client.event
