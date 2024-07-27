@@ -66,7 +66,8 @@ class BandManager(commands.Cog):
                 await interaction.response.send_message(embed=nextcord.Embed(
                     title=ERROR_HEADER,
                     description=f"Вы не можете добавить пользователя {member_to_assign.mention} в свою банду, "
-                                f"поскольку он уже состоит в {other_band_role.mention}!",
+                                f"поскольку он уже состоит в {other_band_role.mention}! Нельзя состоять более, чем "
+                                f"в одной банде.",
                     color=nextcord.Color.red()
                 ), ephemeral=True)
                 return
