@@ -23,7 +23,6 @@ MUTE_DESCRIPTION_MESSAGE = "Теперь он улетает в мут, хоро
 GIF_WARNING_DESCRIPTION_MESSAGE = ("Ваш бесплатный пробный период использования гифок на данный момент закончился. "
                                    "Для продления насыпьте костей или сена в кормушку модераторам.")
 
-unwanted_content = False
 user_message_statistics = {}
 muted_users = {}
 
@@ -115,7 +114,6 @@ async def create_thread(message):
 
 async def check_spam(message):
     user_id = message.author.id
-    global unwanted_content
     global user_message_statistics
     global muted_users
     if user_id not in user_message_statistics:
@@ -125,7 +123,6 @@ async def check_spam(message):
         oldest_message_time = user_message_statistics[user_id].popleft()
         current_time = message.created_at.timestamp()
         if current_time - oldest_message_time <= config.TIME_LIMIT:
-            unwanted_content = True
             muted_users[user_id] = {'channel': message.channel,
                                     'reason': MUTE_REASONS['SPAM']}
             await mute_user(message, MUTE_REASONS['SPAM'])
@@ -134,20 +131,20 @@ async def check_spam(message):
                 if item.author == message.author:
                     await delete_message(item)
             user_message_statistics.pop(user_id, None)
+            return True
 
 
 async def check_nsfw(message, message_images_urls):
     user_id = message.author.id
-    global unwanted_content
     global muted_users
     for image_url in message_images_urls:
         if await is_image_nsfw(image_url):
-            unwanted_content = True
             muted_users[user_id] = {'channel': message.channel,
                                     'reason': MUTE_REASONS['NSFW']}
             await mute_user(message, MUTE_REASONS['NSFW'])
             await delete_message(message)
             logging.info(f"Изображение по адресу {image_url} содержит NSFW-контент и было удалено.")
+            return True
 
 
 async def check_gifs(message, message_images_urls):
@@ -182,9 +179,9 @@ async def on_message(message):
     message_media_urls = get_attached_media(message)
     if message_media_urls['images']:
         if not message.author.guild_permissions.administrator:
-            await check_spam(message)
-            await check_nsfw(message, message_media_urls['images'])
-            if unwanted_content:
+            is_spam = await check_spam(message)
+            is_nsfw = await check_nsfw(message, message_media_urls['images'])
+            if is_spam or is_nsfw:
                 return
             if is_gif_limits and message.channel.id == config.COMMON_DISCUSSION_CHANNEL:
                 await check_gifs(message, message_media_urls['images'])
