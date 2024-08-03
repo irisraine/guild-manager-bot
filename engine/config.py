@@ -11,6 +11,7 @@ MODERATOR_ROLE = int(os.environ['MODERATOR_ROLE'])
 GROUP_ROLES = list(map(int, os.environ['GROUP_ROLES'].split(",")))
 GROUP_LEADERS_ROLES = list(map(int, os.environ['GROUP_LEADERS_ROLES'].split(",")))
 SOLO_SESSION_ROLE = int(os.environ['SOLO_SESSION_ROLE'])
+SOLO_SESSION_CHANNEL = int(os.environ['SOLO_SESSION_CHANNEL'])
 
 TIMEOUT_DURATION = 9000
 GIF_COOLDOWN_DURATION = 600
@@ -21,3 +22,5 @@ BANNER_IMAGE = 'assets/banner.jpg'
 BANNER_WITH_COUNTER_IMAGE = 'assets/banner_with_counter.jpg'
 COUNTER_OVERLAY_IMAGE = 'assets/counter_overlay.png'
 CUSTOM_RDO_FONT = 'assets/chineserocksboldcyrillic.otf'
+
+SOLO_SESSION_IMAGE = 'assets/artur-morgan-solo.gif'

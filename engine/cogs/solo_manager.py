@@ -7,6 +7,7 @@ ERROR_HEADER = "Ошибка"
 UNABLE_TO_ASSIGN_ROLE_TO_BOT = "Невозможно назначать или снимать роли у ботов!"
 SOLO_ROLE_SET = "✅ Роль выдана"
 SOLO_ROLE_REMOVED = "❌ Роль снята"
+CHANNEL_LINK = f"https://discord.com/channels/{config.GUILD_ID}/{config.SOLO_SESSION_CHANNEL}"
 
 
 class SoloManager(commands.Cog):
@@ -39,14 +40,22 @@ class SoloManager(commands.Cog):
         if action == "add":
             if solo_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(solo_role)
-                await interaction.response.send_message(embed=nextcord.Embed(
+                solo_role_assigned_embed = nextcord.Embed(
                     title=SOLO_ROLE_SET,
                     description=f"Ковбой {member_to_assign.mention} получает роль {solo_role.mention} "
-                                f"и триумфально въезжает в город Подфайловск, "
-                                f"становясь его полноправным гражданином!\n\n "
+                                f"и въезжает в [город Подфайловск]({CHANNEL_LINK})!\n\n "
                                 f"*Роль выдал {interaction.user.mention}*",
                     color=nextcord.Color.green()
-                ))
+                )
+                solo_role_assigned_image = nextcord.File(
+                    config.SOLO_SESSION_IMAGE,
+                    filename=config.SOLO_SESSION_IMAGE.split('/')[1]
+                )
+                solo_role_assigned_embed.set_image(url=f"attachment://{config.SOLO_SESSION_IMAGE.split('/')[1]}")
+                await interaction.response.send_message(
+                    embed=solo_role_assigned_embed,
+                    file=solo_role_assigned_image
+                )
                 logging.info(f"Участник {member_to_assign.display_name} получил роль соло сессии, "
                              f"ee выдал модератор {interaction.user.display_name}.")
             else:
