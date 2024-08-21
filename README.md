@@ -19,6 +19,7 @@ the number of members in voice channels. It's a great way to showcase your serve
 - role management feature, allowing moderators and privileged users to efficiently assign and de-assign roles to users. With simple 
 commands, admins can grant specific permissions or revoke them, ensuring that users have the appropriate access and 
 responsibilities within the community.
+- sending custom informational messages from bot itself.
 
 ## Usage
 
@@ -31,21 +32,27 @@ Here is an example:
 # Bot token
 DISCORD_BOT_TOKEN='your-discord-bot-token-here'
 # ID of your server
-GUILD_ID = 1111111111111111111
+GUILD_ID = 0000000000000000000
 # Allowed channels
-ALLOWED_CHANNELS=2222222222222222222, 3333333333333333333
+ALLOWED_CHANNELS=0000000000000000000, 0000000000000000000
 # Common discussion channel
-COMMON_DISCUSSION_CHANNEL=4444444444444444444
+COMMON_DISCUSSION_CHANNEL=0000000000000000000
 # Admin role
-ADMIN_ROLE=5555555555555555555
+ADMIN_ROLE=0000000000000000000
 # Moderator role
-MODERATOR_ROLE=6666666666666666666
+MODERATOR_ROLE=0000000000000000000
 # Group roles
-GROUP_ROLES=7777777777777777777, 8888888888888888888, 9999999999999999999
+GROUP_ROLES=0000000000000000000, 0000000000000000000, 0000000000000000000
 # Group leader roles
-GROUP_LEADERS_ROLES=1111111110000000000, 2222222220000000000, 3333333330000000000
+GROUP_LEADERS_ROLES=0000000000000000000, 0000000000000000000, 0000000000000000000
 # Solo session role
-SOLO_SESSION_ROLE=4444444440000000000
+SOLO_SESSION_ROLE=0000000000000000000
+# Solo session channel
+SOLO_SESSION_CHANNEL=0000000000000000000
+# Solo session second role
+SOLO_SESSION_ROLE_SECOND=0000000000000000000
+# Solo session second channel
+SOLO_SESSION_CHANNEL_SECOND=0000000000000000000
 # API key of Microsoft Content Moderator service
 CONTENT_MODERATOR_API_KEY='your-api-key-here'
 ```
