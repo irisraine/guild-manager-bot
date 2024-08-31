@@ -28,7 +28,10 @@ async def on_message(message):
         if thread_manager:
             await thread_manager.create_thread(message)
     elif not message.author.guild_permissions.administrator and is_message_in_allowed_channel and not message.thread:
-        await message.delete()
+        try:
+            await message.delete()
+        except nextcord.errors.NotFound:
+            logging.warning("Сообщение не найдено, либо оно уже было удалено ранее.")
 
     await client.process_commands(message)
 
