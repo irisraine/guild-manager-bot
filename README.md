@@ -56,7 +56,7 @@ SOLO_SESSION_CHANNEL_SECOND=0000000000000000000
 # API key of Microsoft Content Moderator service
 CONTENT_MODERATOR_API_KEY='your-api-key-here'
 ```
-You can intentionally leave blank the ALLOWED_CHANNELS variable, so bot will have permission to create threads in any public channel.
+You can intentionally leave blank the ALLOWED_CHANNELS variable, so bot will have no permissions to create threads in any public channel.
 
 Once you have added all the necessary environment variables to the .env file, you are ready to use the bot. 
 

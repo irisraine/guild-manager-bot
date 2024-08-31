@@ -14,6 +14,7 @@ async def on_message(message):
         return
 
     message_media_urls = utils.get_attached_media(message)
+    is_message_in_allowed_channel = config.ALLOWED_CHANNELS and message.channel.id in config.ALLOWED_CHANNELS
     if message_media_urls:
         if not message.author.guild_permissions.administrator and message_media_urls['images']:
             image_moderator = client.get_cog('ImageModerator')
@@ -21,10 +22,13 @@ async def on_message(message):
                 is_unwanted_content = await image_moderator.check_unwanted_content(message, message_media_urls['images'])
                 if is_unwanted_content:
                     return
+        if not is_message_in_allowed_channel:
+            return
         thread_manager = client.get_cog('ThreadManager')
-        if thread_manager and (message_media_urls['images'] or message_media_urls['videos']):
-            if config.ALLOWED_CHANNELS and message.channel.id in config.ALLOWED_CHANNELS:
-                await thread_manager.create_thread(message)
+        if thread_manager:
+            await thread_manager.create_thread(message)
+    elif not message.author.guild_permissions.administrator and is_message_in_allowed_channel and not message.thread:
+        await message.delete()
 
     await client.process_commands(message)
 
