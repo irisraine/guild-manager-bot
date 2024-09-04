@@ -4,16 +4,23 @@ import requests
 import logging
 
 
-def load_cogs(client):
+def get_cogs_list():
+    cogs_list = []
     for filename in os.listdir('engine/cogs'):
         if filename.endswith('.py'):
-            extension = filename[:-3]
-            extension_name = f'engine.cogs.{extension}'
-            try:
-                client.load_extension(extension_name)
-                logging.info(f'Модуль {extension} успешно загружен.')
-            except Exception as e:
-                logging.error(f'Ошибка при попытке загрузки модуля {extension}. Дополнительная информация: {e}')
+            extension_name = filename[:-3]
+            cogs_list.append(extension_name)
+    return cogs_list
+
+
+def load_cogs(client):
+    cogs_list = get_cogs_list()
+    for cog in cogs_list:
+        try:
+            client.load_extension(f'engine.cogs.{cog}')
+            logging.info(f'Модуль {cog} успешно загружен.')
+        except Exception as error:
+            logging.error(f'Ошибка при попытке загрузки модуля {cog}. Дополнительная информация: {error}')
 
 
 def get_attached_media(message):

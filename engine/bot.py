@@ -44,7 +44,14 @@ async def on_message(message):
 
 @client.slash_command(description="Загрузить или выгрузить модули бота")
 @application_checks.has_role(config.ADMIN_ROLE)
-async def toggle_extension(interaction: nextcord.Interaction, extension: str):
+async def toggle_extension(
+        interaction: nextcord.Interaction,
+        extension: str = nextcord.SlashOption(
+                name="extension",
+                description="Выберите загружаемый или выгружаемый модуль",
+                choices=utils.get_cogs_list()
+            )
+    ):
     extension_name = f'engine.cogs.{extension}'
     try:
         if extension_name in client.extensions:
