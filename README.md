@@ -20,6 +20,7 @@ the number of members in voice channels. It's a great way to showcase your serve
 commands, admins can grant specific permissions or revoke them, ensuring that users have the appropriate access and 
 responsibilities within the community.
 - sending custom informational messages from bot itself.
+- automatically publishing messages in announcement channels, which is especially useful when combined with news bots.
 
 ## Usage
 
@@ -35,6 +36,8 @@ DISCORD_BOT_TOKEN='your-discord-bot-token-here'
 GUILD_ID = 0000000000000000000
 # Allowed channels
 ALLOWED_CHANNELS=0000000000000000000, 0000000000000000000
+# Announcement channels
+ANNOUNCEMENT_CHANNELS=0000000000000000000, 0000000000000000000
 # Common discussion channel
 COMMON_DISCUSSION_CHANNEL=0000000000000000000
 # Admin role

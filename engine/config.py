@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ALLOWED_CHANNELS = list(map(int, os.environ['ALLOWED_CHANNELS'].split(","))) if os.environ['ALLOWED_CHANNELS'] else []
+ANNOUNCEMENT_CHANNELS = list(map(int, os.environ['ANNOUNCEMENT_CHANNELS'].split(","))) if os.environ['ANNOUNCEMENT_CHANNELS'] else []
 GUILD_ID = int(os.environ['GUILD_ID'])
 COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
 ADMIN_ROLE = int(os.environ['ADMIN_ROLE'])

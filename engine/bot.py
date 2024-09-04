@@ -13,8 +13,14 @@ async def on_message(message):
     if message.author.bot:
         return
 
+    if message.channel.id in config.ANNOUNCEMENT_CHANNELS:
+        publisher = client.get_cog('Publisher')
+        if publisher:
+            await publisher.publish_announcement_message(message)
+            return
+
     message_media_urls = utils.get_attached_media(message)
-    is_message_in_allowed_channel = config.ALLOWED_CHANNELS and message.channel.id in config.ALLOWED_CHANNELS
+    is_message_in_allowed_channel = message.channel.id in config.ALLOWED_CHANNELS
     if message_media_urls:
         if not message.author.guild_permissions.administrator and message_media_urls['images']:
             image_moderator = client.get_cog('ImageModerator')
