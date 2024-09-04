@@ -10,7 +10,7 @@ client = commands.Bot(command_prefix='&', intents=intents, default_guild_ids=[co
 
 @client.event
 async def on_message(message):
-    if message.author.bot:
+    if message.author.id not in config.ANNOUNCEMENT_BOTS and message.author.bot:
         return
 
     if message.channel.id in config.ANNOUNCEMENT_CHANNELS:
