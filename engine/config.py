@@ -16,6 +16,8 @@ SOLO_SESSION_ROLE = int(os.environ['SOLO_SESSION_ROLE'])
 SOLO_SESSION_CHANNEL = int(os.environ['SOLO_SESSION_CHANNEL'])
 SOLO_SESSION_ROLE_SECOND = int(os.environ['SOLO_SESSION_ROLE_SECOND'])
 SOLO_SESSION_CHANNEL_SECOND = int(os.environ['SOLO_SESSION_CHANNEL_SECOND'])
+SOLO_EVENT_ROLE = int(os.environ['SOLO_EVENT_ROLE'])
+SOLO_EVENT_CHANNEL = int(os.environ['SOLO_EVENT_CHANNEL'])
 
 CONTENT_MODERATOR_API_KEY = os.environ['CONTENT_MODERATOR_API_KEY']
 
@@ -30,3 +32,4 @@ COUNTER_OVERLAY_IMAGE = 'assets/counter_overlay.png'
 CUSTOM_RDO_FONT = 'assets/chineserocksboldcyrillic.otf'
 
 SOLO_SESSION_IMAGE = 'assets/artur-morgan-solo.gif'
+SOLO_EVENT_IMAGE = 'assets/event.jpg'

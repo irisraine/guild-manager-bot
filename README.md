@@ -58,6 +58,10 @@ SOLO_SESSION_CHANNEL=0000000000000000000
 SOLO_SESSION_ROLE_SECOND=0000000000000000000
 # Solo session second channel
 SOLO_SESSION_CHANNEL_SECOND=0000000000000000000
+# Solo event role
+SOLO_EVENT_ROLE=0000000000000000000
+# Solo event channel
+SOLO_EVENT_CHANNEL=0000000000000000000
 # API key of Microsoft Content Moderator service
 CONTENT_MODERATOR_API_KEY='your-api-key-here'
 ```
@@ -73,7 +77,7 @@ The image must have a resolution of 1024x576 pixels.
 - `/dynamic_banner <on/off>` - activate or deactivate dynamic banner. After using this command, bot will automatically update the server banner with 
 info of overall server members number. Updating period is set to 10 minutes.
 - `/gif_limits <on/off>` - turn on/off gif images limitation function.
-- `/band <action> <member>`, `/solo <action> <member>` - commands to assign or de-assign specific roles. This commands available only for moderators and group leaders.
+- `/band <action> <member>`, `/solo <action> <member>`, `/event <action> <member>` - commands to assign or de-assign specific roles. This commands available only for moderators and group leaders.
 - `/say` - send custom message in main chat channel from bot itself.
 
 ## Extensions
