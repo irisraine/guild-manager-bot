@@ -30,6 +30,8 @@ BANNER_IMAGE = 'assets/banner.jpg'
 BANNER_WITH_COUNTER_IMAGE = 'assets/banner_with_counter.jpg'
 COUNTER_OVERLAY_IMAGE = 'assets/counter_overlay.png'
 CUSTOM_RDO_FONT = 'assets/chineserocksboldcyrillic.otf'
+SEPARATOR = 'assets/separator.png'
 
 SOLO_SESSION_IMAGE = 'assets/artur-morgan-solo.gif'
+BAND_IMAGE = 'assets/band.jpg'
 SOLO_EVENT_IMAGE = 'assets/event.jpg'

@@ -19,6 +19,20 @@ class RoleManager(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    @staticmethod
+    def embed_message(title=None, description=None, file_path=None):
+        color = nextcord.Color.red() if title == ERROR_HEADER else nextcord.Color.green()
+        if not file_path:
+            file_path = config.SEPARATOR
+        embed = nextcord.Embed(
+            title=title,
+            description=description,
+            color=color
+        )
+        image = nextcord.File(file_path, filename=file_path.split('/')[1])
+        embed.set_image(url=f"attachment://{file_path.split('/')[1]}")
+        return {"embed": embed, "file": image}
+
     @nextcord.slash_command(description="Управление ролями соло сессии")
     @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
     async def solo(
@@ -39,12 +53,10 @@ class RoleManager(commands.Cog):
                 description="Укажите имя пользователя"),
     ):
         if member_to_assign.bot:
-            await interaction.response.send_message(embed=nextcord.Embed(
+            return await interaction.response.send_message(**self.embed_message(
                 title=ERROR_HEADER,
-                description=UNABLE_TO_ASSIGN_ROLE_TO_BOT,
-                color=nextcord.Color.red()
+                description=UNABLE_TO_ASSIGN_ROLE_TO_BOT
             ), ephemeral=True)
-            return
 
         solo_role, solo_channel_name, solo_channel_link = None, None, None
         if location == "city":
@@ -58,50 +70,38 @@ class RoleManager(commands.Cog):
         if action == "add":
             if solo_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(solo_role)
-                solo_role_assigned_embed = nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ROLE_SET,
                     description=f"Ковбой {member_to_assign.mention} получает роль {solo_role.mention} "
                                 f"и въезжает в [{solo_channel_name}]({solo_channel_link})!\n\n "
                                 f"*Роль выдал {interaction.user.mention}*",
-                    color=nextcord.Color.green()
-                )
-                solo_role_assigned_image = nextcord.File(
-                    config.SOLO_SESSION_IMAGE,
-                    filename=config.SOLO_SESSION_IMAGE.split('/')[1]
-                )
-                solo_role_assigned_embed.set_image(url=f"attachment://{config.SOLO_SESSION_IMAGE.split('/')[1]}")
-                await interaction.response.send_message(
-                    embed=solo_role_assigned_embed,
-                    file=solo_role_assigned_image
-                )
+                    file_path=config.SOLO_SESSION_IMAGE
+                ))
                 logging.info(f"Участник {member_to_assign.display_name} получил роль соло сессии "
                              f"(канал {solo_channel_name}), "
                              f"ee выдал модератор {interaction.user.display_name}.")
             else:
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ERROR_HEADER,
                     description=f"Пользователь {member_to_assign.mention} уже имеет роль {solo_role.mention}!",
-                    color=nextcord.Color.red()
                 ), ephemeral=True)
         elif action == "remove":
             if solo_role in member_to_assign.roles:
                 await member_to_assign.remove_roles(solo_role)
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ROLE_REMOVED,
                     description=f"Ковбой {member_to_assign.mention} лишился роли {solo_role.mention} "
                                 f"и покинул {solo_channel_name}.\n\n "
-                                f"*Роль снял {interaction.user.mention}*",
-                    color=nextcord.Color.green()
+                                f"*Роль снял {interaction.user.mention}*"
                 ))
                 logging.info(f"C участника {member_to_assign.display_name} снята роль соло сессии "
                              f"(канал {solo_channel_name}), "
                              f"ее забрал модератор {interaction.user.display_name}.")
             else:
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ERROR_HEADER,
                     description=f"У пользователя {member_to_assign.mention} нет роли {solo_role.mention}, "
                                 f"снимать с него нечего!",
-                    color=nextcord.Color.red()
                 ), ephemeral=True)
 
     @nextcord.slash_command(description="Управление ролью участника ивента")
@@ -119,60 +119,46 @@ class RoleManager(commands.Cog):
                 description="Укажите имя пользователя"),
     ):
         if member_to_assign.bot:
-            await interaction.response.send_message(embed=nextcord.Embed(
+            return await interaction.response.send_message(**self.embed_message(
                 title=ERROR_HEADER,
                 description=UNABLE_TO_ASSIGN_ROLE_TO_BOT,
-                color=nextcord.Color.red()
             ), ephemeral=True)
-            return
 
         event_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_EVENT_ROLE)
         if action == "add":
             if event_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(event_role)
-                event_role_assigned_embed = nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ROLE_SET,
                     description=f"Ковбой {member_to_assign.mention} получает роль {event_role.mention} и ему "
                                 f"открывается доступ в канал <#{config.SOLO_EVENT_CHANNEL}>.\n Теперь ему доведется "
                                 f"пережить невероятные и безумные приключения, что запомнятся на долгие годы!\n\n "
                                 f"*Роль выдал {interaction.user.mention}*",
-                    color=nextcord.Color.green()
-                )
-                event_role_assigned_image = nextcord.File(
-                    config.SOLO_EVENT_IMAGE,
-                    filename=config.SOLO_EVENT_IMAGE.split('/')[1]
-                )
-                event_role_assigned_embed.set_image(url=f"attachment://{config.SOLO_EVENT_IMAGE.split('/')[1]}")
-                await interaction.response.send_message(
-                    embed=event_role_assigned_embed,
-                    file=event_role_assigned_image
-                )
+                    file_path=config.SOLO_EVENT_IMAGE
+                ))
                 logging.info(f"Участник {member_to_assign.display_name} получил роль участника ивента, "
                              f"ee выдал модератор {interaction.user.display_name}.")
             else:
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ERROR_HEADER,
                     description=f"Пользователь {member_to_assign.mention} уже имеет роль {event_role.mention}!",
-                    color=nextcord.Color.red()
                 ), ephemeral=True)
         elif action == "remove":
             if event_role in member_to_assign.roles:
                 await member_to_assign.remove_roles(event_role)
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ROLE_REMOVED,
                     description=f"Ковбой {member_to_assign.mention} лишился роли {event_role.mention} "
                                 f"и завершил участие в ивенте. Организаторы надеются, что ему было весело!\n\n "
-                                f"*Роль снял {interaction.user.mention}*",
-                    color=nextcord.Color.green()
+                                f"*Роль снял {interaction.user.mention}*"
                 ))
                 logging.info(f"C участника {member_to_assign.display_name} снята роль участника ивента, "
                              f"ее забрал модератор {interaction.user.display_name}.")
             else:
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ERROR_HEADER,
                     description=f"У пользователя {member_to_assign.mention} нет роли {event_role.mention}, "
                                 f"снимать с него нечего!",
-                    color=nextcord.Color.red()
                 ), ephemeral=True)
 
     @nextcord.slash_command(description="Управление составом своей банды")
@@ -190,28 +176,22 @@ class RoleManager(commands.Cog):
                 description="Укажите имя пользователя"),
     ):
         if member_to_assign.bot:
-            await interaction.response.send_message(embed=nextcord.Embed(
+            return await interaction.response.send_message(**self.embed_message(
                 title=ERROR_HEADER,
                 description=UNABLE_TO_ASSIGN_BAND_ROLE_TO_BOT,
-                color=nextcord.Color.red()
             ), ephemeral=True)
-            return
         if member_to_assign.id == interaction.user.id:
-            await interaction.response.send_message(embed=nextcord.Embed(
+            return await interaction.response.send_message(**self.embed_message(
                 title=ERROR_HEADER,
                 description=UNABLE_TO_ASSIGN_ROLE_TO_YOURSELF,
-                color=nextcord.Color.red()
             ), ephemeral=True)
-            return
 
         band_leader_role_id = [role.id for role in interaction.user.roles if role.id in config.GROUP_LEADERS_ROLES]
         if not band_leader_role_id:
-            await interaction.response.send_message(embed=nextcord.Embed(
+            return await interaction.response.send_message(**self.embed_message(
                 title=ERROR_HEADER,
                 description=NOT_A_LEADER,
-                color=nextcord.Color.red()
             ), ephemeral=True)
-            return
         band_role_id = config.GROUP_ROLES[config.GROUP_LEADERS_ROLES.index(band_leader_role_id[0])]
         band_role = nextcord.utils.get(interaction.guild.roles, id=band_role_id)
 
@@ -222,52 +202,47 @@ class RoleManager(commands.Cog):
             ]
             if other_band_role_id:
                 other_band_role = nextcord.utils.get(interaction.guild.roles, id=other_band_role_id[0])
-                await interaction.response.send_message(embed=nextcord.Embed(
+                return await interaction.response.send_message(**self.embed_message(
                     title=ERROR_HEADER,
                     description=f"Вы не можете добавить пользователя {member_to_assign.mention} в свою банду, "
                                 f"поскольку он уже состоит в {other_band_role.mention}! Нельзя состоять более, чем "
-                                f"в одной банде.",
-                    color=nextcord.Color.red()
+                                f"в одной банде."
                 ), ephemeral=True)
-                return
-
             if band_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(band_role)
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=BAND_ROLE_SET,
                     description=f"Ковбой {member_to_assign.mention} вступает в {band_role.mention}, и вместе с "
                                 f"новыми товарищами готов взяться за дела, слава о которых "
                                 f"еще прогремит по всему Дикому Западу!\n\n "
                                 f"*Членство выдал предводитель банды {interaction.user.mention}*",
-                    color=nextcord.Color.green()
+                    file_path=config.BAND_IMAGE
                 ))
-                logging.info(f"Участник {member_to_assign.display_name} получил членство в {band_role.name}, "
+                logging.info(f"Участник {member_to_assign.display_name} получил членство в '{band_role.name}', "
                              f"ee выдал предводитель банды {interaction.user.display_name}.")
             else:
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ERROR_HEADER,
                     description=f"Пользователь {member_to_assign.mention} уже состоит в {band_role.mention}!",
-                    color=nextcord.Color.red()
                 ), ephemeral=True)
         elif action == "remove":
             if band_role in member_to_assign.roles:
                 await member_to_assign.remove_roles(band_role)
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=BAND_ROLE_REMOVED,
                     description=f"Ковбой {member_to_assign.mention} лишился членства в {band_role.mention}. Теперь он "
                                 f"одиночка, которому никто не прикроет спину во время скитаний по прериям.\n\n "
-                                f"*Членство отнял предводитель банды {interaction.user.mention}*",
-                    color=nextcord.Color.green()
+                                f"*Членство отнял предводитель банды {interaction.user.mention}*"
                 ))
-                logging.info(f"Участник {member_to_assign.display_name} исключен из {band_role.name}, "
+                logging.info(f"Участник {member_to_assign.display_name} исключен из '{band_role.name}', "
                              f"его выгнал предводитель банды {interaction.user.display_name}.")
             else:
-                await interaction.response.send_message(embed=nextcord.Embed(
+                await interaction.response.send_message(**self.embed_message(
                     title=ERROR_HEADER,
                     description=f"Пользователя {member_to_assign.mention} не является членом {band_role.mention}, "
-                                f"выгонять его неоткуда!",
-                    color=nextcord.Color.red()
+                                f"выгонять его неоткуда!"
                 ), ephemeral=True)
+
 
 def setup(client):
     client.add_cog(RoleManager(client))
