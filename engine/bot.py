@@ -64,14 +64,14 @@ async def toggle_extension(
             client.unload_extension(extension_name)
             await interaction.response.send_message(
                 embed=nextcord.Embed(
-                    description=f"Модуль {extension} отключен.",
+                    description=f"Модуль **{extension}** отключен.",
                     colour=nextcord.Color.green()))
             logging.info(f'Модуль {extension} отключен.')
         else:
             client.load_extension(extension_name)
             await interaction.response.send_message(
                 embed=nextcord.Embed(
-                    description=f"Модуль {extension} успешно активирован.",
+                    description=f"Модуль **{extension}** успешно активирован.",
                     colour=nextcord.Color.green()))
             logging.info(f'Модуль {extension} успешно активирован.')
     except Exception as error:
