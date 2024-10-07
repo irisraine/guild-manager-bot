@@ -19,6 +19,12 @@ async def on_message(message):
             await publisher.publish_announcement_message(message)
             return
 
+    if not message.author.guild_permissions.administrator and message.channel.id == config.COMMANDS_ONLY_CHANNEL:
+        commands_only = client.get_cog('CommandsOnly')
+        if commands_only:
+            await commands_only.check_is_command(message)
+            return
+
     message_media_urls = utils.get_attached_media(message)
     is_message_in_allowed_channel = message.channel.id in config.ALLOWED_CHANNELS
     if message_media_urls:
