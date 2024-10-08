@@ -20,7 +20,7 @@ async def on_message(message):
 
     is_admin = message.author.guild_permissions.administrator
 
-    if message.channel.id in config.COMMANDS_ONLY_CHANNELS:
+    if not is_admin and message.channel.id in config.COMMANDS_ONLY_CHANNELS:
         if commands_only := client.get_cog('CommandsOnly'):
             await commands_only.check_is_command(message)
             return
