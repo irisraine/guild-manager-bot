@@ -6,7 +6,6 @@ load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 ALLOWED_CHANNELS = list(map(int, os.environ['ALLOWED_CHANNELS'].split(","))) if os.environ['ALLOWED_CHANNELS'] else []
 ANNOUNCEMENT_CHANNELS = list(map(int, os.environ['ANNOUNCEMENT_CHANNELS'].split(","))) if os.environ['ANNOUNCEMENT_CHANNELS'] else []
-ANNOUNCEMENT_BOTS = list(map(int, os.environ['ANNOUNCEMENT_BOTS'].split(","))) if os.environ['ANNOUNCEMENT_BOTS'] else []
 GUILD_ID = int(os.environ['GUILD_ID'])
 COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
 ADMIN_ROLE = int(os.environ['ADMIN_ROLE'])
@@ -19,7 +18,7 @@ SOLO_SESSION_ROLE_SECOND = int(os.environ['SOLO_SESSION_ROLE_SECOND'])
 SOLO_SESSION_CHANNEL_SECOND = int(os.environ['SOLO_SESSION_CHANNEL_SECOND'])
 SOLO_EVENT_ROLE = int(os.environ['SOLO_EVENT_ROLE'])
 SOLO_EVENT_CHANNEL = int(os.environ['SOLO_EVENT_CHANNEL'])
-COMMANDS_ONLY_CHANNEL = int(os.environ['COMMANDS_ONLY_CHANNEL'])
+COMMANDS_ONLY_CHANNELS = list(map(int, os.environ['COMMANDS_ONLY_CHANNELS'].split(","))) if os.environ['COMMANDS_ONLY_CHANNELS'] else []
 
 CONTENT_MODERATOR_API_KEY = os.environ['CONTENT_MODERATOR_API_KEY']
 

@@ -10,36 +10,34 @@ client = commands.Bot(command_prefix='&', intents=intents, default_guild_ids=[co
 
 @client.event
 async def on_message(message):
-    if message.author.id not in config.ANNOUNCEMENT_BOTS and message.author.bot:
-        return
-
     if message.channel.id in config.ANNOUNCEMENT_CHANNELS:
-        publisher = client.get_cog('Publisher')
-        if publisher:
+        if publisher := client.get_cog('Publisher'):
             await publisher.publish_announcement_message(message)
             return
 
-    if not message.author.guild_permissions.administrator and message.channel.id == config.COMMANDS_ONLY_CHANNEL:
-        commands_only = client.get_cog('CommandsOnly')
-        if commands_only:
+    if message.author.bot:
+        return
+
+    is_admin = message.author.guild_permissions.administrator
+
+    if message.channel.id in config.COMMANDS_ONLY_CHANNELS:
+        if commands_only := client.get_cog('CommandsOnly'):
             await commands_only.check_is_command(message)
             return
 
     message_media_urls = utils.get_attached_media(message)
     is_message_in_allowed_channel = message.channel.id in config.ALLOWED_CHANNELS
     if message_media_urls:
-        if not message.author.guild_permissions.administrator and message_media_urls['images']:
-            image_moderator = client.get_cog('ImageModerator')
-            if image_moderator:
+        if not is_admin and message_media_urls['images']:
+            if image_moderator := client.get_cog('ImageModerator'):
                 is_unwanted_content = await image_moderator.check_unwanted_content(message, message_media_urls['images'])
                 if is_unwanted_content:
                     return
         if not is_message_in_allowed_channel:
             return
-        thread_manager = client.get_cog('ThreadManager')
-        if thread_manager:
+        if thread_manager := client.get_cog('ThreadManager'):
             await thread_manager.create_thread(message)
-    elif not message.author.guild_permissions.administrator and is_message_in_allowed_channel and not message.thread:
+    elif not is_admin and is_message_in_allowed_channel and not message.thread:
         try:
             await message.delete()
         except nextcord.errors.NotFound:
