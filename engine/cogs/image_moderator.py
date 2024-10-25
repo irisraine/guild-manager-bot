@@ -37,10 +37,10 @@ class ImageModerator(commands.Cog):
             logging.info(f"Изображение по адресу {image_url} проверено")
             return response.json().get('unsafe')
         except requests.exceptions.Timeout:
-            logging.warning("Microsoft Content Moderator не отвечает. Файл не может быть проверен.")
+            logging.warning("Сервис анализа изображений не отвечает. Файл не может быть проверен.")
             return None
         except (requests.RequestException, requests.HTTPError):
-            logging.warning("Ошибка соединения с Microsoft Content Moderator. Файл не может быть проверен.")
+            logging.warning("Ошибка соединения с сервисом анализа изображений. Файл не может быть проверен.")
             return None
 
     async def mute_user(self, message, reason):
