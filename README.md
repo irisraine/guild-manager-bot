@@ -25,7 +25,7 @@ responsibilities within the community.
 ## Usage
 
 If you want to use this bot locally, please make sure to specify the necessary environment variables by creating a .env file 
-in the project directory. This file should contain DISCORD_BOT_TOKEN, GUILD_ID, COMMON_DISCUSSION_CHANNEL and ALLOWED_CHANNELS 
+in the project directory. This file should contain DISCORD_BOT_TOKEN, GUILD_ID, COMMON_DISCUSSION_CHANNEL and MEDIA_ONLY_CHANNELS 
 environment variables and their corresponding values.
 Finally, you need an API key of Microsoft Content Moderator service, and place it to CONTENT_MODERATOR_API_KEY variable.
 Here is an example:
@@ -35,7 +35,7 @@ DISCORD_BOT_TOKEN='your-discord-bot-token-here'
 # ID of your server
 GUILD_ID = 0000000000000000000
 # Allowed channels
-ALLOWED_CHANNELS=0000000000000000000, 0000000000000000000
+MEDIA_ONLY_CHANNELS=0000000000000000000, 0000000000000000000
 # Announcement channels
 ANNOUNCEMENT_CHANNELS=0000000000000000000, 0000000000000000000
 # Common discussion channel
@@ -65,7 +65,7 @@ COMMANDS_ONLY_CHANNELS=0000000000000000000, 0000000000000000000
 # API key of Microsoft Content Moderator service
 CONTENT_MODERATOR_API_KEY='your-api-key-here'
 ```
-You can intentionally leave blank the ALLOWED_CHANNELS variable, so bot will have no permissions to create threads in any public channel.
+You can intentionally leave blank the MEDIA_ONLY_CHANNELS variable, so bot will have no permissions to create threads in any public channel.
 
 Once you have added all the necessary environment variables to the .env file, you are ready to use the bot. 
 

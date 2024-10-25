@@ -30,7 +30,7 @@ LOGGING_SETTINGS = {
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 GUILD_ID = int(os.environ['GUILD_ID'])
-ALLOWED_CHANNELS = list(map(int, os.environ['ALLOWED_CHANNELS'].split(","))) if os.environ['ALLOWED_CHANNELS'] else []
+MEDIA_ONLY_CHANNELS = list(map(int, os.environ['MEDIA_ONLY_CHANNELS'].split(","))) if os.environ['MEDIA_ONLY_CHANNELS'] else []
 ANNOUNCEMENT_CHANNELS = list(map(int, os.environ['ANNOUNCEMENT_CHANNELS'].split(","))) if os.environ['ANNOUNCEMENT_CHANNELS'] else []
 COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
 ADMIN_ROLE = int(os.environ['ADMIN_ROLE'])
