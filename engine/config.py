@@ -49,6 +49,7 @@ CONTENT_MODERATOR = {
     "api_key": os.environ['CONTENT_MODERATOR_API_KEY'],
     "url": "https://nsfw-images-detection-and-classification.p.rapidapi.com/adult-content",
     "host": "nsfw-images-detection-and-classification.p.rapidapi.com",
+    "nsfw_key": "unsafe"
 }
 
 TIMEOUT_DURATION = 9000

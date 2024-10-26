@@ -35,7 +35,7 @@ class ImageModerator(commands.Cog):
         try:
             response = requests.post(url, json=payload, headers=headers)
             logging.info(f"Изображение по адресу {image_url} проверено")
-            return response.json().get('unsafe')
+            return response.json().get(config.CONTENT_MODERATOR["nsfw_key"])
         except requests.exceptions.Timeout:
             logging.warning("Сервис анализа изображений не отвечает. Файл не может быть проверен.")
             return None
@@ -43,7 +43,8 @@ class ImageModerator(commands.Cog):
             logging.warning("Ошибка соединения с сервисом анализа изображений. Файл не может быть проверен.")
             return None
 
-    async def mute_user(self, message, reason):
+    @staticmethod
+    async def mute_user(message, reason):
         try:
             await message.author.timeout(
                 timedelta(seconds=config.TIMEOUT_DURATION),
@@ -53,7 +54,8 @@ class ImageModerator(commands.Cog):
         except nextcord.errors.Forbidden:
             logging.info("Бот не может отправлять в мут привилегированных пользователей.")
 
-    async def delete_message(self, message):
+    @staticmethod
+    async def delete_message(message):
         try:
             await message.delete()
         except nextcord.errors.NotFound:
