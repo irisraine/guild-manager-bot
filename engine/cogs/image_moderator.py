@@ -38,10 +38,8 @@ class ImageModerator(commands.Cog):
             return response.json().get(config.CONTENT_MODERATOR["nsfw_key"])
         except requests.exceptions.Timeout:
             logging.warning("Сервис анализа изображений не отвечает. Файл не может быть проверен.")
-            return None
         except (requests.RequestException, requests.HTTPError):
             logging.warning("Ошибка соединения с сервисом анализа изображений. Файл не может быть проверен.")
-            return None
 
     @staticmethod
     async def mute_user(message, reason):
