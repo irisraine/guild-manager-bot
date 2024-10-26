@@ -25,12 +25,12 @@ class ImageModerator(commands.Cog):
 
     @staticmethod
     async def is_image_nsfw(image_url):
-        url = "https://nsfw-images-detection-and-classification.p.rapidapi.com/adult-content"
+        url = config.CONTENT_MODERATOR["url"]
         payload = {"url": image_url}
         headers = {
             "content-type": "application/json",
-            "x-rapidapi-key": config.CONTENT_MODERATOR_API_KEY,
-            "x-rapidapi-host": "nsfw-images-detection-and-classification.p.rapidapi.com",
+            "x-rapidapi-key": config.CONTENT_MODERATOR["api_key"],
+            "x-rapidapi-host": config.CONTENT_MODERATOR["host"],
         }
         try:
             response = requests.post(url, json=payload, headers=headers)

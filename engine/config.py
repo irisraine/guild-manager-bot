@@ -45,7 +45,11 @@ SOLO_EVENT_ROLE = int(os.environ['SOLO_EVENT_ROLE'])
 SOLO_EVENT_CHANNEL = int(os.environ['SOLO_EVENT_CHANNEL'])
 COMMANDS_ONLY_CHANNELS = list(map(int, os.environ['COMMANDS_ONLY_CHANNELS'].split(","))) if os.environ['COMMANDS_ONLY_CHANNELS'] else []
 
-CONTENT_MODERATOR_API_KEY = os.environ['CONTENT_MODERATOR_API_KEY']
+CONTENT_MODERATOR = {
+    "api_key": os.environ['CONTENT_MODERATOR_API_KEY'],
+    "url": "https://nsfw-images-detection-and-classification.p.rapidapi.com/adult-content",
+    "host": "nsfw-images-detection-and-classification.p.rapidapi.com",
+}
 
 TIMEOUT_DURATION = 9000
 GIF_COOLDOWN_DURATION = 600
