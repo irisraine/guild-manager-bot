@@ -5,28 +5,28 @@ from dotenv import load_dotenv
 load_dotenv()
 
 LOGGING_SETTINGS = {
-        'version': 1,
-        'disable_existing_loggers': True,
-        'formatters': {
-            'standard': {
-                'format': '[%(levelname)s][%(asctime)s] : %(message)s',
-                'datefmt': '%d-%m-%Y %H:%M:%S'
-            },
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'standard': {
+            'format': '[%(levelname)s][%(asctime)s] : %(message)s',
+            'datefmt': '%d-%m-%Y %H:%M:%S'
         },
-        'handlers': {
-            'default': {
-                'level': 'INFO',
-                'formatter': 'standard',
-                'class': 'logging.StreamHandler',
-            },
+    },
+    'handlers': {
+        'default': {
+            'level': 'INFO',
+            'formatter': 'standard',
+            'class': 'logging.StreamHandler',
         },
-        'loggers': {
-            '': {
-                'handlers': ['default'],
-                'level': 'INFO',
-            },
-        }
+    },
+    'loggers': {
+        '': {
+            'handlers': ['default'],
+            'level': 'INFO',
+        },
     }
+}
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 GUILD_ID = int(os.environ['GUILD_ID'])
