@@ -34,7 +34,7 @@ class RoleManager(commands.Cog):
         return {"embed": embed, "file": image}
 
     @nextcord.slash_command(description="Управление ролями соло сессии")
-    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
+    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE)
     async def solo(
             self,
             interaction: nextcord.Interaction,
@@ -105,7 +105,7 @@ class RoleManager(commands.Cog):
                 ), ephemeral=True)
 
     @nextcord.slash_command(description="Управление ролью участника ивента")
-    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, *config.GROUP_LEADERS_ROLES)
+    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE)
     async def event(
             self,
             interaction: nextcord.Interaction,
