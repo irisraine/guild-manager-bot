@@ -18,7 +18,7 @@ class ThreadManager(commands.Cog):
                 auto_archive_duration=60
             )
             await thread.send(GREETING_BOT_MESSAGE)
-            logging.info(f"Создан тред для сообщения id:{message.id}, содержащим медиаконтент")
+            logging.info(f"Создан тред для сообщения id:{message.id}")
         except nextcord.errors.HTTPException as error:
             logging.error(f"При попытке создания треда возникла ошибка сетевого соединения: {error}.")
         except Exception as error:

@@ -25,9 +25,9 @@ responsibilities within the community.
 ## Usage
 
 If you want to use this bot locally, please make sure to specify the necessary environment variables by creating a .env file 
-in the project directory. This file should contain DISCORD_BOT_TOKEN, GUILD_ID, COMMON_DISCUSSION_CHANNEL and MEDIA_ONLY_CHANNELS 
-environment variables and their corresponding values.
-Finally, you need an API key of Microsoft Content Moderator service, and place it to CONTENT_MODERATOR_API_KEY variable.
+in the project directory. This file should contain DISCORD_BOT_TOKEN, GUILD_ID, COMMON_DISCUSSION_CHANNEL environment 
+variables and their corresponding values.
+Finally, you need an API key of preferred image content moderator service, and place it to CONTENT_MODERATOR_API_KEY variable.
 Here is an example:
 ```
 # Bot token
@@ -36,8 +36,6 @@ DISCORD_BOT_TOKEN='your-discord-bot-token-here'
 CONTENT_MODERATOR_API_KEY='your-api-key-here'
 # ID of your server
 GUILD_ID = 0000000000000000000
-# Media-only channels
-MEDIA_ONLY_CHANNELS=0000000000000000000, 0000000000000000000
 # Announcement channels
 ANNOUNCEMENT_CHANNELS=0000000000000000000, 0000000000000000000
 # Common discussion channel
@@ -46,10 +44,6 @@ COMMON_DISCUSSION_CHANNEL=0000000000000000000
 ADMIN_ROLE=0000000000000000000
 # Moderator role
 MODERATOR_ROLE=0000000000000000000
-# Group roles
-GROUP_ROLES=0000000000000000000, 0000000000000000000, 0000000000000000000
-# Group leader roles
-GROUP_LEADERS_ROLES=0000000000000000000, 0000000000000000000, 0000000000000000000
 # Solo session role
 SOLO_SESSION_ROLE=0000000000000000000
 # Solo session channel
@@ -62,27 +56,32 @@ SOLO_SESSION_CHANNEL_SECOND=0000000000000000000
 SOLO_EVENT_ROLE=0000000000000000000
 # Solo event channel
 SOLO_EVENT_CHANNEL=0000000000000000000
-# Commands-only channel
-COMMANDS_ONLY_CHANNELS=0000000000000000000, 0000000000000000000
 ```
-You can intentionally leave blank the MEDIA_ONLY_CHANNELS variable, so bot will have no permissions to create threads in any public channel.
+Once the bot is running, you need to use the configuration panel to specify the list of channels where the bot is 
+active and processes incoming messages in a particular way.
 
-Once you have added all the necessary environment variables to the .env file, you are ready to use the bot. 
+Once you have added all the necessary environment variables to the .env file, and configure channels 
+using `/setup` option, you are ready to use the bot. 
 
-If you want to use a dynamic banner function, be sure that you put your current server's banner image in `assets` folder with name `banner.jpg` (replace the default image). 
+If you want to use a dynamic banner function, be sure that you put your current server's banner image in `assets` 
+folder with name `banner.jpg` (replace the default image). 
 The image must have a resolution of 1024x576 pixels.
 
 ## Commands
 
-- `/dynamic_banner <on/off>` - activate or deactivate dynamic banner. After using this command, bot will automatically update the server banner with 
+- `/dynamic_banner <on/off>` - activate or deactivate dynamic banner. After using this command, bot will automatically 
+- update the server banner with 
 info of overall server members number. Updating period is set to 10 minutes.
 - `/gif_limits <on/off>` - turn on/off gif images limitation function.
-- `/band <action> <member>`, `/solo <action> <member>`, `/event <action> <member>` - commands to assign or de-assign specific roles. This commands available only for moderators and group leaders.
+- `/band <action> <member>`, `/solo <action> <member>`, `/event <action> <member>` - commands to assign or de-assign 
+specific roles. This commands available only for moderators and group leaders.
 - `/say` - send custom message in main chat channel from bot itself.
+- `/setup` - configuration panel, that allows the admin to set up the channels where bot performs specific actions. 
 
 ## Extensions
 
-The bot can obtain additional functionality via using extensions located in the `cogs` folder. Extensions are loading automatically at startup. 
+The bot can obtain additional functionality via using extensions located in the `cogs` folder. Extensions are loading 
+automatically at startup. 
 Also, you can manually load or unload specific extensions use `/toggle_extension <extension_name>` command.
 
 ## Limitations

@@ -1,18 +1,14 @@
 import nextcord
 from nextcord.ext import commands, tasks, application_checks
 import logging
-import engine.config as config
 import requests
+import re
 from datetime import datetime, timedelta
 from collections import deque
-import re
+import engine.config as config
+import engine.messages as messages
 
-MUTE_HEADER_MESSAGE = '❌ Здравствуйте, вам бан! ❌'
-GIF_WARNING_HEADER_MESSAGE = '💢 It\'s time to stop! 💢'
 MUTE_REASONS = {'SPAM': "спамил картинками", 'NSFW': "постил непотребства"}
-MUTE_DESCRIPTION_MESSAGE = "Теперь он улетает в мут, хорошенько подумать о своем поведении!"
-GIF_WARNING_DESCRIPTION_MESSAGE = ("Ваш бесплатный пробный период использования гифок на данный момент закончился. "
-                                   "Для продления насыпьте костей или сена в кормушку модераторам.")
 
 
 class ImageModerator(commands.Cog):
@@ -111,11 +107,12 @@ class ImageModerator(commands.Cog):
                     previous_warning_message = await self.safe_fetch_message(previous_warning_id)
                     if previous_warning_message:
                         await self.delete_message(previous_warning_message)
-                warning_message = await message.channel.send(embed=nextcord.Embed(
-                    title=GIF_WARNING_HEADER_MESSAGE,
-                    description=f"Уважаемый {message.author.mention}! {GIF_WARNING_DESCRIPTION_MESSAGE}",
-                    colour=nextcord.Color.red())
-                )
+                warning_message = await message.channel.send(**messages.custom_embed_message(
+                    title="💢 It's time to stop! 💢",
+                    description=f"Уважаемый {message.author.mention}! Ваш бесплатный пробный период использования "
+                                f"гифок на данный момент закончился. Для продления насыпьте костей или сена в "
+                                f"кормушку модераторам.",
+                    color="red"))
                 self.users_gifs[user_id]['warning_id'] = warning_message.id
                 await self.delete_message(message)
             else:
@@ -145,12 +142,12 @@ class ImageModerator(commands.Cog):
             if after.id in self.muted_users.keys():
                 channel = self.muted_users[after.id]['channel']
                 reason_for_muting = self.muted_users[after.id]['reason']
-                mute_info = nextcord.Embed(
-                    title=MUTE_HEADER_MESSAGE,
-                    description=f'Абоба {after.mention} {reason_for_muting}. {MUTE_DESCRIPTION_MESSAGE}',
-                    colour=nextcord.Color.red()
-                )
-                await channel.send(embed=mute_info)
+                await channel.send(**messages.custom_embed_message(
+                    title="❌ Здравствуйте, вам бан! ❌",
+                    description=f"Абоба {after.mention} {reason_for_muting}! "
+                                f"Теперь он улетает в мут, хорошенько подумать о своем поведении!",
+                    color="red"
+                ))
                 self.muted_users.pop(after.id, None)
 
     @nextcord.slash_command(description="Ограничения на использование гифок")
@@ -171,11 +168,10 @@ class ImageModerator(commands.Cog):
             self.purge_gif_warnings.stop()
             self.users_gifs.clear()
         status = "установлено" if toggle == "on" else "отменено"
-        await interaction.response.send_message(
-            embed=nextcord.Embed(
-                description=f"Ограничение на использование гифок {status}.",
-                colour=nextcord.Color.red())
-        )
+        await interaction.response.send_message(**messages.custom_embed_message(
+            description=f"Ограничение на использование гифок {status}.",
+            color="red"
+        ))
         logging.info(f'Ограничение на использование гифок {status}.')
 
 

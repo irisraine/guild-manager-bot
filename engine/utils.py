@@ -2,6 +2,8 @@ import os
 import re
 import requests
 import logging
+import json
+import tempfile
 
 
 def get_cogs_list():
@@ -58,3 +60,35 @@ def get_attached_media(message):
         'images': attached_images_urls,
         'videos': attached_videos_urls
     }
+
+
+def json_safeload(filepath):
+    if not os.path.isfile(filepath):
+        logging.error(f"Произошла ошибка при попытке открытия файла '{filepath}'! Файл не найден.")
+        return
+    try:
+        with open(filepath, 'r') as jsonfile:
+            return json.load(jsonfile)
+    except Exception as error:
+        logging.error(f"Произошла ошибка '{error}' при попытке открытия файла '{filepath}'! Работа бота невозможна")
+
+
+def json_safewrite(filepath, data):
+    dir_name = os.path.dirname(filepath)
+    try:
+        with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False) as temp_jsonfile:
+            temp_jsonfile_name = temp_jsonfile.name
+            json.dump(data, temp_jsonfile, indent=4)
+        os.replace(temp_jsonfile_name, filepath)
+    except Exception as error:
+        logging.error(f"Произошла ошибка '{error}' при попытке записи файла '{filepath}'! Изменения не сохранены.")
+        if os.path.exists(temp_jsonfile_name):
+            os.remove(temp_jsonfile_name)
+
+
+def validator(value):
+    try:
+        int_value = int(value)
+        return 18 <= len(str(int_value)) <= 19
+    except (ValueError, TypeError):
+        return False

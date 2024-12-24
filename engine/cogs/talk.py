@@ -1,16 +1,10 @@
 import nextcord
-from nextcord import Interaction
 from nextcord.ext import commands, application_checks
 import engine.config as config
+import engine.messages as messages
 
 
-TALK_PANEL_INITIAL_MESSAGE = ("Лесной олень стал сильнее и умнее, по воле своего творца обретя дар разума и речи. "
-                              "На что же он употребит обретенную мощь? С каким словом обратится к миру?")
-TALK_PANEL_USAGE_RESTRICTION = "Управлять Лесным оленем могут только те, чьи дороги пролегают меж звезд"
-SUCCESSFUL_SENDING = "Сообщение в салун отправлено!"
-
-
-class MessageByBot(nextcord.ui.Modal):
+class TalkModal(nextcord.ui.Modal):
     def __init__(self):
         super().__init__("Отправка сообщения от лица бота")
 
@@ -22,14 +16,17 @@ class MessageByBot(nextcord.ui.Modal):
         )
         self.add_item(self.message_content)
 
-    async def callback(self, interaction: Interaction) -> None:
+    async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer()
         channel = interaction.guild.get_channel(config.COMMON_DISCUSSION_CHANNEL)
         await channel.send(self.message_content.value)
-        await interaction.followup.send(SUCCESSFUL_SENDING, ephemeral=True)
+        await interaction.followup.send(
+            **messages.custom_embed_message(description="Сообщение в салун отправлено!"),
+            ephemeral=True
+        )
 
 
-class MessagePanel(nextcord.ui.View):
+class TalkView(nextcord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
@@ -37,16 +34,12 @@ class MessagePanel(nextcord.ui.View):
         if interaction.user.guild_permissions.administrator:
             return True
         else:
-            await interaction.response.send_message(
-                embed=nextcord.Embed(
-                    description=TALK_PANEL_USAGE_RESTRICTION,
-                    colour=nextcord.Color.red()),
-                ephemeral=True)
+            await interaction.response.send_message(**messages.admin_option_only_warning(), ephemeral=True)
             return False
 
     @nextcord.ui.button(label="Сообщение", style=nextcord.ButtonStyle.blurple, emoji="🦌")
     async def send_message_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_modal(MessageByBot())
+        await interaction.response.send_modal(TalkModal())
 
     @nextcord.ui.button(label="Закрыть", style=nextcord.ButtonStyle.red, emoji="✖️")
     async def close_panel_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -61,10 +54,11 @@ class Talk(commands.Cog):
     @application_checks.has_role(config.ADMIN_ROLE)
     async def say(self, interaction: nextcord.Interaction):
         await interaction.response.send_message(
-            embed=nextcord.Embed(
-                description=TALK_PANEL_INITIAL_MESSAGE,
-                colour=nextcord.Color.green()),
-            view=MessagePanel()
+            **messages.custom_embed_message(
+                title="Сообщение в салун от лица Лесного Оленя",
+                description="Лесной олень стал сильнее и умнее, по воле своего творца обретя дар разума и речи. "
+                            "На что же он употребит обретенную мощь? С каким словом обратится к миру?"),
+            view=TalkView()
         )
 
 

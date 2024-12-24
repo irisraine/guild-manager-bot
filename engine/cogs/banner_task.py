@@ -1,8 +1,9 @@
 import nextcord
 from nextcord.ext import commands, tasks, application_checks
 from PIL import Image, ImageDraw, ImageFont
-import engine.config as config
 import logging
+import engine.config as config
+import engine.messages as messages
 
 
 class BannerTask(commands.Cog):
@@ -81,11 +82,10 @@ class BannerTask(commands.Cog):
             banner_binary_data = self.get_banner_binary_data(config.BANNER_IMAGE)
             await guild.edit(banner=banner_binary_data)
         status = "активирован" if toggle == "on" else "отключен"
-        await interaction.response.send_message(
-            embed=nextcord.Embed(
-                description=f"Динамический баннер {status}.",
-                colour=nextcord.Color.green())
-        )
+        await interaction.response.send_message(**messages.custom_embed_message(
+            description=f"Динамический баннер {status}.",
+            color="red"
+        ))
         logging.info(f"Динамический баннер {status}.")
 
 

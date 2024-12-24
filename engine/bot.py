@@ -3,6 +3,8 @@ from nextcord.ext import commands, application_checks
 import logging
 import engine.config as config
 import engine.utils as utils
+import engine.views as views
+import engine.messages as messages
 
 intents = nextcord.Intents.all()
 client = commands.Bot(command_prefix='&', intents=intents, default_guild_ids=[config.GUILD_ID])
@@ -14,10 +16,13 @@ async def on_message(message):
         if publisher := client.get_cog('Publisher'):
             return await publisher.publish_announcement_message(message)
 
-    if message.author.bot:
+    if message.author.bot and message.channel.id not in config.BOTS_ALLOWED_CHANNELS:
         return
 
-    is_privileged = any(role.id in (config.ADMIN_ROLE, config.MODERATOR_ROLE) for role in message.author.roles)
+    is_privileged = (
+            message.author.bot or
+            any(role.id in (config.ADMIN_ROLE, config.MODERATOR_ROLE) for role in message.author.roles)
+    )
 
     if not is_privileged and message.channel.id in config.COMMANDS_ONLY_CHANNELS:
         if commands_only := client.get_cog('CommandsOnly'):
@@ -25,18 +30,22 @@ async def on_message(message):
 
     message_media_urls = utils.get_attached_media(message)
     is_message_in_media_only_channel = message.channel.id in config.MEDIA_ONLY_CHANNELS
+    is_message_in_auto_threading_channel = message.channel.id in config.AUTO_THREADING_CHANNELS
+    is_message_in_no_moderation_channel = message.channel.id in config.NO_MODERATION_CHANNELS
     if message_media_urls:
-        if not is_privileged and message_media_urls['images'] and (image_moderator := client.get_cog('ImageModerator')):
-            is_unwanted_content = await image_moderator.check_unwanted_content(message, message_media_urls['images'])
-            if is_unwanted_content:
-                return
-        if is_message_in_media_only_channel and (thread_manager := client.get_cog('ThreadManager')):
-            await thread_manager.create_thread(message)
+        if image_moderator := client.get_cog('ImageModerator'):
+            images = message_media_urls['images']
+            if not is_privileged and not is_message_in_no_moderation_channel and images:
+                is_unwanted_content = await image_moderator.check_unwanted_content(message, images)
+                if is_unwanted_content:
+                    return
     elif not is_privileged and is_message_in_media_only_channel and not message.thread:
         try:
-            await message.delete()
+            return await message.delete()
         except nextcord.errors.NotFound:
             logging.warning("Сообщение не найдено, либо оно уже было удалено ранее.")
+    if is_message_in_auto_threading_channel and (thread_manager := client.get_cog('ThreadManager')):
+        await thread_manager.create_thread(message)
 
     await client.process_commands(message)
 
@@ -56,35 +65,39 @@ async def toggle_extension(
         if extension_name in client.extensions:
             client.unload_extension(extension_name)
             await interaction.response.send_message(
-                embed=nextcord.Embed(
-                    description=f"Модуль **{extension}** отключен.",
-                    colour=nextcord.Color.green()))
+                **messages.toggle_extension(action="off", extension=extension)
+            )
             logging.info(f'Модуль {extension} отключен.')
         else:
             client.load_extension(extension_name)
             await interaction.response.send_message(
-                embed=nextcord.Embed(
-                    description=f"Модуль **{extension}** успешно активирован.",
-                    colour=nextcord.Color.green()))
+                **messages.toggle_extension(action="on", extension=extension)
+            )
             logging.info(f'Модуль {extension} успешно активирован.')
     except Exception as error:
         await interaction.response.send_message(
-            embed=nextcord.Embed(
-                description=f"Ошибка при попытке загрузки модуля {extension}.",
-                colour=nextcord.Color.red()), ephemeral=True)
+            **messages.toggle_extension(extension=extension, is_valid=False), ephemeral=True)
         logging.error(f'Ошибка при попытке загрузки модуля {extension}. Дополнительная информация: {error}')
+
+
+@client.slash_command(description="Панель конфигурации")
+@application_checks.has_permissions(administrator=True)
+async def setup(interaction: nextcord.Interaction):
+    await interaction.response.send_message(
+        **messages.setup(),
+        view=views.SetupMenuView()
+    )
 
 
 @client.event
 async def on_application_command_error(interaction: nextcord.Interaction, error):
-    handled_errors = (application_checks.ApplicationMissingAnyRole, application_checks.ApplicationMissingRole)
+    handled_errors = (
+        application_checks.ApplicationMissingAnyRole,
+        application_checks.ApplicationMissingRole,
+        application_checks.ApplicationMissingPermissions
+    )
     if isinstance(error, handled_errors):
-        await interaction.response.send_message(
-            embed=nextcord.Embed(
-                title="Ошибка",
-                description="У вас недостаточно прав для использования данной команды!",
-                colour=nextcord.Color.red()), ephemeral=True
-        )
+        await interaction.response.send_message(**messages.error())
     else:
         logging.error(f"При использовании команды произошла непредвиденная ошибка: {error}")
 

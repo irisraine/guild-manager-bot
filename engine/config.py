@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import engine.utils as utils
 
 
 load_dotenv()
@@ -28,22 +29,41 @@ LOGGING_SETTINGS = {
     }
 }
 
+CATEGORY_EMOJI = {
+    "auto_threading": "🗂️",
+    "band": "<:1bi:1132997100687339621>",
+    "media_only": "📷",
+    "commands_only": "⚙️",
+    "no_moderation": "⛔",
+    "bots_allowed": "🤖",
+}
+
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 GUILD_ID = int(os.environ['GUILD_ID'])
-MEDIA_ONLY_CHANNELS = list(map(int, os.environ['MEDIA_ONLY_CHANNELS'].split(","))) if os.environ['MEDIA_ONLY_CHANNELS'] else []
 ANNOUNCEMENT_CHANNELS = list(map(int, os.environ['ANNOUNCEMENT_CHANNELS'].split(","))) if os.environ['ANNOUNCEMENT_CHANNELS'] else []
 COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
 ADMIN_ROLE = int(os.environ['ADMIN_ROLE'])
 MODERATOR_ROLE = int(os.environ['MODERATOR_ROLE'])
-GROUP_ROLES = list(map(int, os.environ['GROUP_ROLES'].split(",")))
-GROUP_LEADERS_ROLES = list(map(int, os.environ['GROUP_LEADERS_ROLES'].split(",")))
 SOLO_SESSION_ROLE = int(os.environ['SOLO_SESSION_ROLE'])
 SOLO_SESSION_CHANNEL = int(os.environ['SOLO_SESSION_CHANNEL'])
 SOLO_SESSION_ROLE_SECOND = int(os.environ['SOLO_SESSION_ROLE_SECOND'])
 SOLO_SESSION_CHANNEL_SECOND = int(os.environ['SOLO_SESSION_CHANNEL_SECOND'])
 SOLO_EVENT_ROLE = int(os.environ['SOLO_EVENT_ROLE'])
 SOLO_EVENT_CHANNEL = int(os.environ['SOLO_EVENT_CHANNEL'])
-COMMANDS_ONLY_CHANNELS = list(map(int, os.environ['COMMANDS_ONLY_CHANNELS'].split(","))) if os.environ['COMMANDS_ONLY_CHANNELS'] else []
+
+MEDIA_ONLY_CHANNELS_JSON = "settings/media_only.json"
+MEDIA_ONLY_CHANNELS = utils.json_safeload(MEDIA_ONLY_CHANNELS_JSON)['channels']
+COMMANDS_ONLY_CHANNELS_JSON = "settings/commands_only.json"
+COMMANDS_ONLY_CHANNELS = utils.json_safeload(COMMANDS_ONLY_CHANNELS_JSON)['channels']
+AUTO_THREADING_CHANNELS_JSON = "settings/auto_threading.json"
+AUTO_THREADING_CHANNELS = utils.json_safeload(AUTO_THREADING_CHANNELS_JSON)['channels']
+NO_MODERATION_CHANNELS_JSON = "settings/no_moderation.json"
+NO_MODERATION_CHANNELS = utils.json_safeload(NO_MODERATION_CHANNELS_JSON)['channels']
+BOTS_ALLOWED_CHANNELS_JSON = "settings/bots_allowed.json"
+BOTS_ALLOWED_CHANNELS = utils.json_safeload(BOTS_ALLOWED_CHANNELS_JSON)['channels']
+BANDS_JSON = "settings/authorized_bands.json"
+BAND_ROLES = utils.json_safeload(BANDS_JSON)['band_roles']
+BAND_LEADERS_ROLES = utils.json_safeload(BANDS_JSON)['band_leader_roles']
 
 CONTENT_MODERATOR = {
     "api_key": os.environ['CONTENT_MODERATOR_API_KEY'],
@@ -66,3 +86,13 @@ SEPARATOR = 'assets/separator.png'
 SOLO_SESSION_IMAGE = 'assets/artur-morgan-solo.gif'
 BAND_IMAGE = 'assets/band.jpg'
 SOLO_EVENT_IMAGE = 'assets/event.jpg'
+
+SETUP_MENU_IMAGE = 'assets/setup_menu.jpg'
+SUCCESS_IMAGE = 'assets/success.jpg'
+ERROR_IMAGE = 'assets/error.jpg'
+COMMANDS_ONLY_IMAGE = 'assets/commands_only.jpg'
+MEDIA_ONLY_IMAGE = 'assets/media_only.jpg'
+AUTO_THREADING_IMAGE = 'assets/auto_threading.jpg'
+BAND_AUTHORIZATION_IMAGE = 'assets/band_authorization.jpg'
+BOT_ALLOWED_IMAGE = 'assets/bots_allowed.jpg'
+NO_MODERATION_IMAGE = 'assets/no_moderation.jpg'
