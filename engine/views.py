@@ -26,13 +26,13 @@ class SetupMenuView(nextcord.ui.View):
                 emoji=config.CATEGORY_EMOJI["auto_threading"]),
             nextcord.SelectOption(
                 label="Авторизация банд",
-                value="band",
+                value="authorize_band",
                 description="Право выдавать роль участника банды",
-                emoji=config.CATEGORY_EMOJI["band"]),
+                emoji=config.CATEGORY_EMOJI["authorize_band"]),
             nextcord.SelectOption(
                 label="Медиа-каналы",
                 value="media_only",
-                description="Список каналов только для медиаконтента (картинки и видео)",
+                description="Список каналов только для картинок и видео",
                 emoji=config.CATEGORY_EMOJI["media_only"]),
             nextcord.SelectOption(
                 label="Каналы для команд",
@@ -42,7 +42,7 @@ class SetupMenuView(nextcord.ui.View):
             nextcord.SelectOption(
                 label="Немодерируемые каналы",
                 value="no_moderation",
-                description="Список каналов с отключенной системой модерации контента",
+                description="Список каналов с отключенной системой модерации",
                 emoji=config.CATEGORY_EMOJI["no_moderation"]),
             nextcord.SelectOption(
                 label="Каналы для ботов",
@@ -52,36 +52,41 @@ class SetupMenuView(nextcord.ui.View):
         ]
     )
     async def select_setup_menu_callback(self, select, interaction: nextcord.Interaction):
-        admin_actions = {
+        setup_actions = {
             "auto_threading": {
-                "message": messages.special_channels(category="auto_threading", channels_list=config.AUTO_THREADING_CHANNELS),
-                "view": ChannelView(category="auto_threading")
+                "message": messages.special_channels(category="auto_threading",
+                                                     channels_list=config.AUTO_THREADING_CHANNELS),
+                "view": SpecialChannelsView(category="auto_threading")
             },
-            "band": {
-                "message": messages.authorized_bands(config.BAND_ROLES),
-                "view": BandsView()
+            "authorize_band": {
+                "message": messages.authorized_bands(config.AUTHORIZED_BAND_ROLES),
+                "view": AuthorizedBandsView()
             },
             "media_only": {
-                "message": messages.special_channels(category="media_only", channels_list=config.MEDIA_ONLY_CHANNELS),
-                "view": ChannelView(category="media_only")
+                "message": messages.special_channels(category="media_only",
+                                                     channels_list=config.MEDIA_ONLY_CHANNELS),
+                "view": SpecialChannelsView(category="media_only")
             },
             "commands_only": {
-                "message": messages.special_channels(category="commands_only", channels_list=config.COMMANDS_ONLY_CHANNELS),
-                "view": ChannelView(category="commands_only")
+                "message": messages.special_channels(category="commands_only",
+                                                     channels_list=config.COMMANDS_ONLY_CHANNELS),
+                "view": SpecialChannelsView(category="commands_only")
             },
             "no_moderation": {
-                "message": messages.special_channels(category="no_moderation", channels_list=config.NO_MODERATION_CHANNELS),
-                "view": ChannelView(category="no_moderation")
+                "message": messages.special_channels(category="no_moderation",
+                                                     channels_list=config.NO_MODERATION_CHANNELS),
+                "view": SpecialChannelsView(category="no_moderation")
             },
             "bots_allowed": {
-                "message": messages.special_channels(category="bots_allowed", channels_list=config.BOTS_ALLOWED_CHANNELS),
-                "view": ChannelView(category="bots_allowed")
+                "message": messages.special_channels(category="bots_allowed",
+                                                     channels_list=config.BOTS_ALLOWED_CHANNELS),
+                "view": SpecialChannelsView(category="bots_allowed")
             },
         }
         await interaction.response.defer()
         await interaction.edit_original_message(
-            **admin_actions[select.values[0]]["message"],
-            view=admin_actions[select.values[0]]["view"]
+            **setup_actions[select.values[0]]["message"],
+            view=setup_actions[select.values[0]]["view"]
         )
 
     @nextcord.ui.button(label="Закрыть панель конфигурации", style=nextcord.ButtonStyle.gray, emoji="❌")
@@ -115,27 +120,27 @@ class SetupActionBasicView(nextcord.ui.View):
         await interaction.delete_original_message()
 
 
-class ChannelView(SetupActionBasicView):
+class SpecialChannelsView(SetupActionBasicView):
     def __init__(self, category):
         super().__init__()
         self.category = category
 
     @nextcord.ui.button(label="Добавить канал", style=nextcord.ButtonStyle.green, emoji="➕")
-    async def set_cooldown_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_modal(ChannelModal(category=self.category, action="add"))
+    async def add_special_channel_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.response.send_modal(SpecialChannelsModal(category=self.category, action="add"))
 
     @nextcord.ui.button(label="Удалить канал", style=nextcord.ButtonStyle.red, emoji="➖")
-    async def default_cooldown_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_modal(ChannelModal(category=self.category, action="remove"))
+    async def remove_special_channel_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.response.send_modal(SpecialChannelsModal(category=self.category, action="remove"))
 
 
-class ChannelModal(nextcord.ui.Modal):
+class SpecialChannelsModal(nextcord.ui.Modal):
     CATEGORIES = {
-        'auto_threading': (config.AUTO_THREADING_CHANNELS, config.AUTO_THREADING_CHANNELS_JSON),
-        'commands_only': (config.COMMANDS_ONLY_CHANNELS, config.COMMANDS_ONLY_CHANNELS_JSON),
-        'media_only': (config.MEDIA_ONLY_CHANNELS, config.MEDIA_ONLY_CHANNELS_JSON),
-        'no_moderation': (config.NO_MODERATION_CHANNELS, config.NO_MODERATION_CHANNELS_JSON),
-        'bots_allowed': (config.BOTS_ALLOWED_CHANNELS, config.BOTS_ALLOWED_CHANNELS_JSON)
+        'auto_threading': {'ids': config.AUTO_THREADING_CHANNELS, 'json_file': config.AUTO_THREADING_CHANNELS_JSON},
+        'media_only': {'ids': config.MEDIA_ONLY_CHANNELS, 'json_file': config.MEDIA_ONLY_CHANNELS_JSON},
+        'commands_only': {'ids': config.COMMANDS_ONLY_CHANNELS, 'json_file': config.COMMANDS_ONLY_CHANNELS_JSON},
+        'no_moderation': {'ids': config.NO_MODERATION_CHANNELS, 'json_file': config.NO_MODERATION_CHANNELS_JSON},
+        'bots_allowed': {'ids': config.BOTS_ALLOWED_CHANNELS, 'json_file': config.BOTS_ALLOWED_CHANNELS_JSON},
     }
 
     def __init__(self, category, action):
@@ -143,80 +148,82 @@ class ChannelModal(nextcord.ui.Modal):
         self.action = action
         super().__init__("Добавить канал" if self.action == "add" else "Удалить канал")
 
-        self.channel = nextcord.ui.TextInput(
+        self.special_channel = nextcord.ui.TextInput(
             label="ID канала",
             required=True,
             style=nextcord.TextInputStyle.short
         )
-        self.add_item(self.channel)
+        self.add_item(self.special_channel)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer()
         if self.action == "add":
-            if not utils.validator(self.channel.value):
+            if not utils.validator(self.special_channel.value):
                 return await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel=self.channel.value, action=self.action, is_valid=False, reason="typo"
+                        channel_id=self.special_channel.value, action=self.action, is_valid=False, reason="typo"
                     ))
-            if int(self.channel.value) not in self.CATEGORIES[self.category][0]:
-                channel = bot.client.get_channel(int(self.channel.value))
+            special_channel_id = int(self.special_channel.value)
+            if special_channel_id not in self.CATEGORIES[self.category]['ids']:
+                channel = bot.client.get_channel(special_channel_id)
                 if channel:
-                    self.CATEGORIES[self.category][0].append(int(self.channel.value))
+                    self.CATEGORIES[self.category]['ids'].append(special_channel_id)
                     utils.json_safewrite(
-                        filepath=self.CATEGORIES[self.category][1],
-                        data={"channels": self.CATEGORIES[self.category][0]}
+                        filepath=self.CATEGORIES[self.category]['json_file'],
+                        data={"channels": self.CATEGORIES[self.category]['ids']}
                     )
                     await interaction.followup.send(
                         **messages.special_channels_confirmation(
-                            channel=self.channel.value, action=self.action
+                            channel_id=special_channel_id, action=self.action
                         ))
                 else:
                     await interaction.followup.send(
                         **messages.special_channels_confirmation(
-                            channel=self.channel.value, action=self.action, is_valid=False, reason="not_exist"
+                            channel_id=special_channel_id, action=self.action, is_valid=False, reason="not_exist"
                         ))
             else:
                 await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel=self.channel.value, action=self.action, is_valid=False, reason="already_added"
+                        channel_id=special_channel_id, action=self.action, is_valid=False, reason="already_added"
                     ))
         if self.action == "remove":
-            if not utils.validator(self.channel.value):
+            if not utils.validator(self.special_channel.value):
                 return await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel=self.channel.value, action=self.action, is_valid=False, reason="typo"
+                        channel_id=self.special_channel.value, action=self.action, is_valid=False, reason="typo"
                     ))
-            if int(self.channel.value) in self.CATEGORIES[self.category][0]:
-                self.CATEGORIES[self.category][0].remove(int(self.channel.value))
+            special_channel_id = int(self.special_channel.value)
+            if special_channel_id in self.CATEGORIES[self.category]['ids']:
+                self.CATEGORIES[self.category]['ids'].remove(special_channel_id)
                 utils.json_safewrite(
-                    filepath=self.CATEGORIES[self.category][1],
-                    data={"channels": self.CATEGORIES[self.category][0]}
+                    filepath=self.CATEGORIES[self.category]['json_file'],
+                    data={"channels": self.CATEGORIES[self.category]['ids']}
                 )
                 await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel=self.channel.value, action=self.action
+                        channel_id=special_channel_id, action=self.action
                     ))
             else:
                 await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel=self.channel.value, action=self.action, is_valid=False, reason="already_removed"
+                        channel_id=special_channel_id, action=self.action, is_valid=False, reason="already_removed"
                     ))
 
 
-class BandsView(SetupActionBasicView):
+class AuthorizedBandsView(SetupActionBasicView):
     def __init__(self):
         super().__init__()
 
     @nextcord.ui.button(label="Авторизовать банду", style=nextcord.ButtonStyle.green, emoji="➕")
-    async def set_cooldown_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_modal(BandsAddModal())
+    async def authorize_band_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.response.send_modal(AuthorizedBandsAddModal())
 
     @nextcord.ui.button(label="Деавторизовать банду", style=nextcord.ButtonStyle.red, emoji="➖")
-    async def default_cooldown_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_modal(BandsRemoveModal())
+    async def deauthorize_band_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.response.send_modal(AuthorizedBandsRemoveModal())
 
 
-class BandsAddModal(nextcord.ui.Modal):
+class AuthorizedBandsAddModal(nextcord.ui.Modal):
     def __init__(self):
         super().__init__("Авторизовать банду и ее предводителя")
 
@@ -238,53 +245,60 @@ class BandsAddModal(nextcord.ui.Modal):
         if not utils.validator(self.band_role.value):
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role=self.band_role.value, action="add", is_valid=False, role_category="band_role", reason="typo"
+                    band_role_id=self.band_role.value, action="add",
+                    is_valid=False, role_category="band", reason="typo"
                 ))
         if not utils.validator(self.band_leader_role.value):
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role=self.band_role.value, action="add", is_valid=False, role_category="band_role_leader", reason="typo"
+                    band_role_id=self.band_role.value, action="add",
+                    is_valid=False, role_category="band_leader", reason="typo"
                 ))
-        if int(self.band_role.value) not in config.BAND_ROLES and int(self.band_leader_role.value) not in config.BAND_LEADERS_ROLES:
-            band_role = interaction.guild.get_role(int(self.band_role.value))
-            band_leader_role = interaction.guild.get_role(int(self.band_leader_role.value))
+        band_role_id, band_leader_role_id = int(self.band_role.value), int(self.band_leader_role.value)
+        if band_role_id not in config.AUTHORIZED_BAND_ROLES and band_leader_role_id not in config.AUTHORIZED_BAND_LEADERS_ROLES:
+            band_role = interaction.guild.get_role(band_role_id)
+            band_leader_role = interaction.guild.get_role(band_leader_role_id)
             if band_role and band_leader_role:
-                config.BAND_ROLES.append(int(self.band_role.value))
-                config.BAND_LEADERS_ROLES.append(int(self.band_leader_role.value))
+                config.AUTHORIZED_BAND_ROLES.append(band_role_id)
+                config.AUTHORIZED_BAND_LEADERS_ROLES.append(band_leader_role_id)
                 utils.json_safewrite(
-                    filepath=config.BANDS_JSON,
+                    filepath=config.AUTHORIZED_BANDS_JSON,
                     data={
-                        "band_roles": config.BAND_ROLES,
-                        "band_leader_roles": config.BAND_LEADERS_ROLES
+                        "band_roles": config.AUTHORIZED_BAND_ROLES,
+                        "band_leader_roles": config.AUTHORIZED_BAND_LEADERS_ROLES
                     }
                 )
                 await interaction.followup.send(
                     **messages.authorized_bands_confirmation(
-                        band_role=self.band_role.value, action="add"
+                        band_role_id=band_role_id, action="add"
                     ))
             elif not band_role:
                 return await interaction.followup.send(
                     **messages.authorized_bands_confirmation(
-                        band_role=self.band_role.value, action="add", is_valid=False, role_category="band_role", reason="not_exist"
+                        band_role_id=band_role_id, action="add", is_valid=False,
+                        role_category="band", reason="not_exist"
                     ))
             elif not band_leader_role:
                 return await interaction.followup.send(
                     **messages.authorized_bands_confirmation(
-                        band_role=self.band_role.value, action="add", is_valid=False, role_category="band_leader_role", reason="not_exist"
+                        band_role_id=band_role_id, action="add", is_valid=False,
+                        role_category="band_leader", reason="not_exist"
                     ))
-        elif int(self.band_role.value) in config.BAND_ROLES:
+        elif band_role_id in config.AUTHORIZED_BAND_ROLES:
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role=self.band_role.value, action="add", is_valid=False, role_category="band_role", reason="already_added"
+                    band_role_id=band_role_id, action="add", is_valid=False,
+                    role_category="band", reason="already_added"
                 ))
-        elif int(self.band_leader_role.value) in config.BAND_LEADERS_ROLES:
+        elif band_leader_role_id in config.AUTHORIZED_BAND_LEADERS_ROLES:
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role=self.band_role.value, action="add", is_valid=False, role_category="band_leader_role", reason="already_added"
+                    band_role_id=band_role_id, action="add", is_valid=False,
+                    role_category="band_leader", reason="already_added"
                 ))
 
 
-class BandsRemoveModal(nextcord.ui.Modal):
+class AuthorizedBandsRemoveModal(nextcord.ui.Modal):
     def __init__(self):
         super().__init__("Деавторизовать банду")
 
@@ -300,25 +314,26 @@ class BandsRemoveModal(nextcord.ui.Modal):
         if not utils.validator(self.band_role.value):
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role=self.band_role.value, action="remove", is_valid=False, reason="typo"
+                    band_role_id=self.band_role.value, action="remove", is_valid=False, reason="typo"
                 ))
-        if int(self.band_role.value) in config.BAND_ROLES:
-            role_index = config.BAND_ROLES.index(int(self.band_role.value))
-            config.BAND_ROLES.remove(int(self.band_role.value))
-            del config.BAND_LEADERS_ROLES[role_index]
+        band_role_id = int(self.band_role.value)
+        if band_role_id in config.AUTHORIZED_BAND_ROLES:
+            band_role_index = config.AUTHORIZED_BAND_ROLES.index(band_role_id)
+            config.AUTHORIZED_BAND_ROLES.remove(band_role_id)
+            del config.AUTHORIZED_BAND_LEADERS_ROLES[band_role_index]
             utils.json_safewrite(
-                filepath=config.BANDS_JSON,
+                filepath=config.AUTHORIZED_BANDS_JSON,
                 data={
-                    "band_roles": config.BAND_ROLES,
-                    "band_leader_roles": config.BAND_LEADERS_ROLES
+                    "band_roles": config.AUTHORIZED_BAND_ROLES,
+                    "band_leader_roles": config.AUTHORIZED_BAND_LEADERS_ROLES
                 }
             )
             await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role=self.band_role.value, action="remove"
+                    band_role_id=band_role_id, action="remove"
                 ))
         else:
             await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role=self.band_role.value, action="remove", is_valid=False, reason="already_removed"
+                    band_role_id=band_role_id, action="remove", is_valid=False, reason="already_removed"
                 ))

@@ -98,7 +98,7 @@ def special_channels(category, channels_list):
                         f"Включение канала в данный список позволяет разрешить дополнительную настройку обработки "
                         f"сообщений, в частности, разрешить создание тредов для сообщений от ботов, что в обычных "
                         f"условиях невозможно.")
-        image_path = config.BOT_ALLOWED_IMAGE
+        image_path = config.BOTS_ALLOWED_IMAGE
     embed_message = MessageContainer(
         title=title,
         description=description,
@@ -107,7 +107,7 @@ def special_channels(category, channels_list):
     return {'embed': embed_message.embed, 'file': embed_message.image}
 
 
-def special_channels_confirmation(channel, action=None, is_valid=True, reason=None):
+def special_channels_confirmation(channel_id, action=None, is_valid=True, reason=None):
     title = SUCCESS_HEADER if is_valid else ERROR_HEADER
     image_path = config.SUCCESS_IMAGE if is_valid else config.ERROR_IMAGE
     description = "Канал "
@@ -121,7 +121,7 @@ def special_channels_confirmation(channel, action=None, is_valid=True, reason=No
             elif reason == "already_added":
                 description += "Этот канал уже присутствует в списке, повторно его добавить нельзя."
         else:
-            description += f" <#{channel}> успешно добавлен в список."
+            description += f" <#{channel_id}> успешно добавлен в список."
     if action == "remove":
         if not is_valid:
             description += " не удалось удалить. "
@@ -130,7 +130,7 @@ def special_channels_confirmation(channel, action=None, is_valid=True, reason=No
             elif reason == "already_removed":
                 description += "Этот канал уже отсутствует в списке."
         else:
-            description += f" <#{channel}> успешно удален из списка."
+            description += f" <#{channel_id}> успешно удален из списка."
     embed_message = MessageContainer(
         title=title,
         description=description,
@@ -157,14 +157,14 @@ def authorized_bands(roles_list):
     return {'embed': embed_message.embed, 'file': embed_message.image}
 
 
-def authorized_bands_confirmation(band_role, action=None, is_valid=True, role_category=None, reason=None):
+def authorized_bands_confirmation(band_role_id, action=None, is_valid=True, role_category=None, reason=None):
     title = SUCCESS_HEADER if is_valid else ERROR_HEADER
     image_path = config.SUCCESS_IMAGE if is_valid else config.ERROR_IMAGE
     description = ""
     if action == "add":
         if not is_valid:
             description += "Банду не удалось авторизовать. "
-            role_category_text = "бандитской роли" if role_category == "band_role" else "роли предводителя банды"
+            role_category_text = "бандитской роли" if role_category == "band" else "роли предводителя банды"
             if reason == "typo":
                 description += (f"Вы ошиблись при вводе ID {role_category_text}. "
                                 "Он должен состоять из 18 или 19 цифр.")
@@ -172,10 +172,14 @@ def authorized_bands_confirmation(band_role, action=None, is_valid=True, role_ca
                 description += (f"Вы ошиблись при вводе ID {role_category_text}. "
                                 f"Такой роли не существует на нашем сервере!")
             elif reason == "already_added":
-                description += (f"Этот ID {role_category_text} уже присутствует в списке банд, "
-                                f"повторно его добавить нельзя.")
+                if role_category == "band":
+                    description += ("Этот ID бандитской роли уже присутствует в списке банд, "
+                                    "повторно его добавить нельзя.")
+                elif role_category == "band_leader":
+                    description += ("Этот ID принадлежит предводителю другой банды. Один и тот же участник не может "
+                                    "одновременно возглавлять несколько банд!")
         else:
-            description += f"Банда <@&{band_role}> и ее предводитель успешно авторизованы!"
+            description += f"Банда <@&{band_role_id}> и ее предводитель успешно авторизованы!"
     if action == "remove":
         if not is_valid:
             description += "Банду не удалось деавторизовать. "
@@ -184,7 +188,7 @@ def authorized_bands_confirmation(band_role, action=None, is_valid=True, role_ca
             elif reason == "already_removed":
                 description += "Эта банда не была авторизована ранее и отсутствует в списке."
         else:
-            description += (f"Банда <@&{band_role}> и ее предводитель успешно деавторизованы. "
+            description += (f"Банда <@&{band_role_id}> и ее предводитель успешно деавторизованы. "
                             f"Память о ней сотрут пески времен.")
     embed_message = MessageContainer(
         title=title,

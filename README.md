@@ -36,31 +36,27 @@ DISCORD_BOT_TOKEN='your-discord-bot-token-here'
 CONTENT_MODERATOR_API_KEY='your-api-key-here'
 # ID of your server
 GUILD_ID = 0000000000000000000
-# Announcement channels
-ANNOUNCEMENT_CHANNELS=0000000000000000000, 0000000000000000000
-# Common discussion channel
-COMMON_DISCUSSION_CHANNEL=0000000000000000000
 # Admin role
 ADMIN_ROLE=0000000000000000000
 # Moderator role
 MODERATOR_ROLE=0000000000000000000
-# Solo session role
-SOLO_SESSION_ROLE=0000000000000000000
-# Solo session channel
-SOLO_SESSION_CHANNEL=0000000000000000000
-# Solo session second role
-SOLO_SESSION_ROLE_SECOND=0000000000000000000
-# Solo session second channel
-SOLO_SESSION_CHANNEL_SECOND=0000000000000000000
-# Solo event role
-SOLO_EVENT_ROLE=0000000000000000000
-# Solo event channel
-SOLO_EVENT_CHANNEL=0000000000000000000
+# Common discussion channel
+COMMON_DISCUSSION_CHANNEL=0000000000000000000
+# Announcement channels
+ANNOUNCEMENT_CHANNELS=0000000000000000000, 0000000000000000000
+# Solo session roles
+SOLO_SESSION_ROLES = 0000000000000000000, 0000000000000000000
+# Solo session channels
+SOLO_SESSION_CHANNELS = 0000000000000000000, 0000000000000000000
+# Event role
+EVENT_ROLE = 0000000000000000000
+# Event channel
+EVENT_CHANNEL = 0000000000000000000
 ```
 Once the bot is running, you need to use the configuration panel to specify the list of channels where the bot is 
 active and processes incoming messages in a particular way.
 
-Once you have added all the necessary environment variables to the .env file, and configure channels 
+After you have added all the necessary environment variables to the .env file, and configure channels 
 using `/setup` option, you are ready to use the bot. 
 
 If you want to use a dynamic banner function, be sure that you put your current server's banner image in `assets` 

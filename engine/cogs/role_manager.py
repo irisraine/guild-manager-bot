@@ -33,12 +33,12 @@ class RoleManager(commands.Cog):
                 **messages.error(description="Невозможно назначать или снимать роли у ботов!"))
         solo_role, solo_channel_name, solo_channel_link = None, None, None
         if location == "city":
-            solo_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_SESSION_ROLE)
-            solo_channel_link = f"https://discord.com/channels/{config.GUILD_ID}/{config.SOLO_SESSION_CHANNEL}"
+            solo_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_SESSION_ROLES[0])
+            solo_channel_link = f"https://discord.com/channels/{config.GUILD_ID}/{config.SOLO_SESSION_CHANNELS[0]}"
             solo_channel_name = "город Подфайловск"
         elif location == "suburb":
-            solo_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_SESSION_ROLE_SECOND)
-            solo_channel_link = f"https://discord.com/channels/{config.GUILD_ID}/{config.SOLO_SESSION_CHANNEL_SECOND}"
+            solo_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_SESSION_ROLES[1])
+            solo_channel_link = f"https://discord.com/channels/{config.GUILD_ID}/{config.SOLO_SESSION_CHANNELS[1]}"
             solo_channel_name = "пригород Подфайловска"
         if action == "add":
             if solo_role not in member_to_assign.roles:
@@ -142,7 +142,7 @@ class RoleManager(commands.Cog):
                 name="username",
                 description="Укажите имя пользователя"),
     ):
-        band_leader_role_id = [role.id for role in interaction.user.roles if role.id in config.BAND_LEADERS_ROLES]
+        band_leader_role_id = [role.id for role in interaction.user.roles if role.id in config.AUTHORIZED_BAND_LEADERS_ROLES]
         if not band_leader_role_id:
             return await interaction.response.send_message(
                 **messages.error(description="Вы не являетесь предводителем ни одной из банд и не можете выдавать "
@@ -154,13 +154,13 @@ class RoleManager(commands.Cog):
             return await interaction.response.send_message(
                 **messages.error(description="Предводитель банды всегда состоит в ней, и он не может быть "
                                              "удален или добавлен повторно."))
-        band_role_id = config.BAND_ROLES[config.BAND_LEADERS_ROLES.index(band_leader_role_id[0])]
+        band_role_id = config.AUTHORIZED_BAND_ROLES[config.AUTHORIZED_BAND_LEADERS_ROLES.index(band_leader_role_id[0])]
         band_role = nextcord.utils.get(interaction.guild.roles, id=band_role_id)
 
         if action == "add":
             other_band_role_id = [
                 role.id for role in member_to_assign.roles
-                if role.id in (set(config.BAND_ROLES) - {band_role_id})
+                if role.id in (set(config.AUTHORIZED_BAND_ROLES) - {band_role_id})
             ]
             if other_band_role_id:
                 other_band_role = nextcord.utils.get(interaction.guild.roles, id=other_band_role_id[0])

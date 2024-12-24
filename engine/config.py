@@ -31,8 +31,8 @@ LOGGING_SETTINGS = {
 
 CATEGORY_EMOJI = {
     "auto_threading": "🗂️",
-    "band": "<:1bi:1132997100687339621>",
-    "media_only": "📷",
+    "authorize_band": "<:1bi:1132997100687339621>",
+    "media_only": "🏞️",
     "commands_only": "⚙️",
     "no_moderation": "⛔",
     "bots_allowed": "🤖",
@@ -40,30 +40,28 @@ CATEGORY_EMOJI = {
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 GUILD_ID = int(os.environ['GUILD_ID'])
-ANNOUNCEMENT_CHANNELS = list(map(int, os.environ['ANNOUNCEMENT_CHANNELS'].split(","))) if os.environ['ANNOUNCEMENT_CHANNELS'] else []
-COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
 ADMIN_ROLE = int(os.environ['ADMIN_ROLE'])
 MODERATOR_ROLE = int(os.environ['MODERATOR_ROLE'])
-SOLO_SESSION_ROLE = int(os.environ['SOLO_SESSION_ROLE'])
-SOLO_SESSION_CHANNEL = int(os.environ['SOLO_SESSION_CHANNEL'])
-SOLO_SESSION_ROLE_SECOND = int(os.environ['SOLO_SESSION_ROLE_SECOND'])
-SOLO_SESSION_CHANNEL_SECOND = int(os.environ['SOLO_SESSION_CHANNEL_SECOND'])
+COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
+ANNOUNCEMENT_CHANNELS = list(map(int, os.environ['ANNOUNCEMENT_CHANNELS'].split(","))) if os.environ['ANNOUNCEMENT_CHANNELS'] else []
+SOLO_SESSION_ROLES = list(map(int, os.environ['SOLO_SESSION_ROLES'].split(",")))
+SOLO_SESSION_CHANNELS = list(map(int, os.environ['SOLO_SESSION_CHANNELS'].split(",")))
 SOLO_EVENT_ROLE = int(os.environ['SOLO_EVENT_ROLE'])
 SOLO_EVENT_CHANNEL = int(os.environ['SOLO_EVENT_CHANNEL'])
 
+AUTO_THREADING_CHANNELS_JSON = "settings/auto_threading.json"
+AUTO_THREADING_CHANNELS = utils.json_safeload(AUTO_THREADING_CHANNELS_JSON)['channels']
 MEDIA_ONLY_CHANNELS_JSON = "settings/media_only.json"
 MEDIA_ONLY_CHANNELS = utils.json_safeload(MEDIA_ONLY_CHANNELS_JSON)['channels']
 COMMANDS_ONLY_CHANNELS_JSON = "settings/commands_only.json"
 COMMANDS_ONLY_CHANNELS = utils.json_safeload(COMMANDS_ONLY_CHANNELS_JSON)['channels']
-AUTO_THREADING_CHANNELS_JSON = "settings/auto_threading.json"
-AUTO_THREADING_CHANNELS = utils.json_safeload(AUTO_THREADING_CHANNELS_JSON)['channels']
 NO_MODERATION_CHANNELS_JSON = "settings/no_moderation.json"
 NO_MODERATION_CHANNELS = utils.json_safeload(NO_MODERATION_CHANNELS_JSON)['channels']
 BOTS_ALLOWED_CHANNELS_JSON = "settings/bots_allowed.json"
 BOTS_ALLOWED_CHANNELS = utils.json_safeload(BOTS_ALLOWED_CHANNELS_JSON)['channels']
-BANDS_JSON = "settings/authorized_bands.json"
-BAND_ROLES = utils.json_safeload(BANDS_JSON)['band_roles']
-BAND_LEADERS_ROLES = utils.json_safeload(BANDS_JSON)['band_leader_roles']
+AUTHORIZED_BANDS_JSON = "settings/authorized_bands.json"
+AUTHORIZED_BAND_ROLES = utils.json_safeload(AUTHORIZED_BANDS_JSON)['band_roles']
+AUTHORIZED_BAND_LEADERS_ROLES = utils.json_safeload(AUTHORIZED_BANDS_JSON)['band_leader_roles']
 
 CONTENT_MODERATOR = {
     "api_key": os.environ['CONTENT_MODERATOR_API_KEY'],
@@ -90,9 +88,9 @@ SOLO_EVENT_IMAGE = 'assets/event.jpg'
 SETUP_MENU_IMAGE = 'assets/setup_menu.jpg'
 SUCCESS_IMAGE = 'assets/success.jpg'
 ERROR_IMAGE = 'assets/error.jpg'
-COMMANDS_ONLY_IMAGE = 'assets/commands_only.jpg'
-MEDIA_ONLY_IMAGE = 'assets/media_only.jpg'
 AUTO_THREADING_IMAGE = 'assets/auto_threading.jpg'
 BAND_AUTHORIZATION_IMAGE = 'assets/band_authorization.jpg'
-BOT_ALLOWED_IMAGE = 'assets/bots_allowed.jpg'
+MEDIA_ONLY_IMAGE = 'assets/media_only.jpg'
+COMMANDS_ONLY_IMAGE = 'assets/commands_only.jpg'
 NO_MODERATION_IMAGE = 'assets/no_moderation.jpg'
+BOTS_ALLOWED_IMAGE = 'assets/bots_allowed.jpg'
