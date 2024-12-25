@@ -60,9 +60,10 @@ def setup():
     return {'embed': embed_message.embed, 'file': embed_message.image}
 
 
-def special_channels(category, channels_list):
+def special_channels(category):
     title = "Cписок"
     description = ""
+    channels_list = config.SPECIAL_CHANNELS_CATEGORIES[category]['ids']
     if not channels_list:
         channels_list_with_mentions = "*Список пуст! Ни одного канала еще не добавлено.*"
     else:
@@ -145,11 +146,12 @@ def special_channels_confirmation(action=None, channel_id=None, is_valid=True, r
     return {'embed': embed_message.embed, 'file': embed_message.image, 'ephemeral': True}
 
 
-def authorized_bands(roles_list):
-    if not roles_list:
+def authorized_bands():
+    band_roles_list = config.AUTHORIZED_BAND_ROLES
+    if not band_roles_list:
         roles_list_list_with_mentions = "*Список пуст! Ни одной банды пока еще не авторизовано.*"
     else:
-        roles_list_list_with_mentions = "\n".join([f"- <@&{role}> — **ID**: {role}" for role in roles_list])
+        roles_list_list_with_mentions = "\n".join([f"- <@&{role}> — **ID**: {role}" for role in band_roles_list])
     embed_message = MessageContainer(
         title="Список авторизованных банд",
         description="На настоящий момент на нашем сервере присутствуют следующие банды: \n\n"

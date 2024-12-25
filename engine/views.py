@@ -59,37 +59,31 @@ class SetupMenuView(nextcord.ui.View):
     async def select_setup_menu_callback(self, select, interaction: nextcord.Interaction):
         setup_actions = {
             "auto_threading": {
-                "message": messages.special_channels(category="auto_threading",
-                                                     channels_list=config.AUTO_THREADING_CHANNELS),
+                "message": messages.special_channels(category="auto_threading"),
                 "view": SpecialChannelsView(category="auto_threading")
             },
             "authorize_band": {
-                "message": messages.authorized_bands(config.AUTHORIZED_BAND_ROLES),
+                "message": messages.authorized_bands(),
                 "view": AuthorizedBandsView()
             },
             "media_only": {
-                "message": messages.special_channels(category="media_only",
-                                                     channels_list=config.MEDIA_ONLY_CHANNELS),
+                "message": messages.special_channels(category="media_only"),
                 "view": SpecialChannelsView(category="media_only")
             },
             "commands_only": {
-                "message": messages.special_channels(category="commands_only",
-                                                     channels_list=config.COMMANDS_ONLY_CHANNELS),
+                "message": messages.special_channels(category="commands_only"),
                 "view": SpecialChannelsView(category="commands_only")
             },
             "no_moderation": {
-                "message": messages.special_channels(category="no_moderation",
-                                                     channels_list=config.NO_MODERATION_CHANNELS),
+                "message": messages.special_channels(category="no_moderation"),
                 "view": SpecialChannelsView(category="no_moderation")
             },
             "bots_allowed": {
-                "message": messages.special_channels(category="bots_allowed",
-                                                     channels_list=config.BOTS_ALLOWED_CHANNELS),
+                "message": messages.special_channels(category="bots_allowed"),
                 "view": SpecialChannelsView(category="bots_allowed")
             },
             "announcement": {
-                "message": messages.special_channels(category="announcement",
-                                                     channels_list=config.ANNOUNCEMENT_CHANNELS),
+                "message": messages.special_channels(category="announcement"),
                 "view": SpecialChannelsView(category="announcement")
             },
         }
@@ -145,15 +139,6 @@ class SpecialChannelsView(SetupActionBasicView):
 
 
 class SpecialChannelsModal(nextcord.ui.Modal):
-    CATEGORIES = {
-        'auto_threading': {'ids': config.AUTO_THREADING_CHANNELS, 'json_file': config.AUTO_THREADING_CHANNELS_JSON},
-        'media_only': {'ids': config.MEDIA_ONLY_CHANNELS, 'json_file': config.MEDIA_ONLY_CHANNELS_JSON},
-        'commands_only': {'ids': config.COMMANDS_ONLY_CHANNELS, 'json_file': config.COMMANDS_ONLY_CHANNELS_JSON},
-        'no_moderation': {'ids': config.NO_MODERATION_CHANNELS, 'json_file': config.NO_MODERATION_CHANNELS_JSON},
-        'bots_allowed': {'ids': config.BOTS_ALLOWED_CHANNELS, 'json_file': config.BOTS_ALLOWED_CHANNELS_JSON},
-        'announcement': {'ids': config.ANNOUNCEMENT_CHANNELS, 'json_file': config.ANNOUNCEMENT_CHANNELS_JSON},
-    }
-
     def __init__(self, category, action):
         self.category = category
         self.action = action
@@ -175,13 +160,13 @@ class SpecialChannelsModal(nextcord.ui.Modal):
                     **messages.special_channels_confirmation(
                         action=self.action, is_valid=False, reason="typo"
                     ))
-            if special_channel_id not in self.CATEGORIES[self.category]['ids']:
+            if special_channel_id not in config.SPECIAL_CHANNELS_CATEGORIES[self.category]['ids']:
                 channel = bot.client.get_channel(special_channel_id)
                 if channel:
-                    self.CATEGORIES[self.category]['ids'].append(special_channel_id)
+                    config.SPECIAL_CHANNELS_CATEGORIES[self.category]['ids'].append(special_channel_id)
                     utils.json_safewrite(
-                        filepath=self.CATEGORIES[self.category]['json_file'],
-                        data={"channels": self.CATEGORIES[self.category]['ids']}
+                        filepath=config.SPECIAL_CHANNELS_CATEGORIES[self.category]['json_file'],
+                        data={"channels": config.SPECIAL_CHANNELS_CATEGORIES[self.category]['ids']}
                     )
                     await interaction.followup.send(
                         **messages.special_channels_confirmation(
@@ -203,11 +188,11 @@ class SpecialChannelsModal(nextcord.ui.Modal):
                     **messages.special_channels_confirmation(
                         action=self.action, is_valid=False, reason="typo"
                     ))
-            if special_channel_id in self.CATEGORIES[self.category]['ids']:
-                self.CATEGORIES[self.category]['ids'].remove(special_channel_id)
+            if special_channel_id in config.SPECIAL_CHANNELS_CATEGORIES[self.category]['ids']:
+                config.SPECIAL_CHANNELS_CATEGORIES[self.category]['ids'].remove(special_channel_id)
                 utils.json_safewrite(
-                    filepath=self.CATEGORIES[self.category]['json_file'],
-                    data={"channels": self.CATEGORIES[self.category]['ids']}
+                    filepath=config.SPECIAL_CHANNELS_CATEGORIES[self.category]['json_file'],
+                    data={"channels": config.SPECIAL_CHANNELS_CATEGORIES[self.category]['ids']}
                 )
                 await interaction.followup.send(
                     **messages.special_channels_confirmation(

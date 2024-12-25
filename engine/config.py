@@ -77,6 +77,15 @@ AUTHORIZED_BAND_LEADERS_ROLES = utils.json_safeload(AUTHORIZED_BANDS_JSON)['band
 ANNOUNCEMENT_CHANNELS_JSON = "settings/announcement.json"
 ANNOUNCEMENT_CHANNELS = utils.json_safeload(ANNOUNCEMENT_CHANNELS_JSON)['channels']
 
+SPECIAL_CHANNELS_CATEGORIES = {
+    'auto_threading': {'ids': AUTO_THREADING_CHANNELS, 'json_file': AUTO_THREADING_CHANNELS_JSON},
+    'media_only': {'ids': MEDIA_ONLY_CHANNELS, 'json_file': MEDIA_ONLY_CHANNELS_JSON},
+    'commands_only': {'ids': COMMANDS_ONLY_CHANNELS, 'json_file': COMMANDS_ONLY_CHANNELS_JSON},
+    'no_moderation': {'ids': NO_MODERATION_CHANNELS, 'json_file': NO_MODERATION_CHANNELS_JSON},
+    'bots_allowed': {'ids': BOTS_ALLOWED_CHANNELS, 'json_file': BOTS_ALLOWED_CHANNELS_JSON},
+    'announcement': {'ids': ANNOUNCEMENT_CHANNELS, 'json_file': ANNOUNCEMENT_CHANNELS_JSON},
+}
+
 CONTENT_MODERATOR = {
     "api_key": os.environ['CONTENT_MODERATOR_API_KEY'],
     "url": "https://nsfw-images-detection-and-classification.p.rapidapi.com/adult-content",
