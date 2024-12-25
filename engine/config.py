@@ -36,6 +36,7 @@ CATEGORY_EMOJI = {
     "commands_only": "⚙️",
     "no_moderation": "⛔",
     "bots_allowed": "🤖",
+    "announcement": "📰",
 }
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
@@ -43,11 +44,22 @@ GUILD_ID = int(os.environ['GUILD_ID'])
 ADMIN_ROLE = int(os.environ['ADMIN_ROLE'])
 MODERATOR_ROLE = int(os.environ['MODERATOR_ROLE'])
 COMMON_DISCUSSION_CHANNEL = int(os.environ['COMMON_DISCUSSION_CHANNEL'])
-ANNOUNCEMENT_CHANNELS = list(map(int, os.environ['ANNOUNCEMENT_CHANNELS'].split(","))) if os.environ['ANNOUNCEMENT_CHANNELS'] else []
-SOLO_SESSION_ROLES = list(map(int, os.environ['SOLO_SESSION_ROLES'].split(",")))
-SOLO_SESSION_CHANNELS = list(map(int, os.environ['SOLO_SESSION_CHANNELS'].split(",")))
-SOLO_EVENT_ROLE = int(os.environ['SOLO_EVENT_ROLE'])
-SOLO_EVENT_CHANNEL = int(os.environ['SOLO_EVENT_CHANNEL'])
+SOLO_SESSION = {
+    "city": {
+        'role': list(map(int, os.environ['SOLO_SESSION_ROLES'].split(",")))[0],
+        'channel': list(map(int, os.environ['SOLO_SESSION_CHANNELS'].split(",")))[0],
+        'name': "город Подфайловск"
+    },
+    "suburb": {
+        'role': list(map(int, os.environ['SOLO_SESSION_ROLES'].split(",")))[1],
+        'channel': list(map(int, os.environ['SOLO_SESSION_CHANNELS'].split(",")))[1],
+        'name': "пригород Подфайловска"
+    }
+}
+SOLO_EVENT = {
+    'role': int(os.environ['SOLO_EVENT_ROLE']),
+    'channel': int(os.environ['SOLO_EVENT_CHANNEL'])
+}
 
 AUTO_THREADING_CHANNELS_JSON = "settings/auto_threading.json"
 AUTO_THREADING_CHANNELS = utils.json_safeload(AUTO_THREADING_CHANNELS_JSON)['channels']
@@ -62,6 +74,8 @@ BOTS_ALLOWED_CHANNELS = utils.json_safeload(BOTS_ALLOWED_CHANNELS_JSON)['channel
 AUTHORIZED_BANDS_JSON = "settings/authorized_bands.json"
 AUTHORIZED_BAND_ROLES = utils.json_safeload(AUTHORIZED_BANDS_JSON)['band_roles']
 AUTHORIZED_BAND_LEADERS_ROLES = utils.json_safeload(AUTHORIZED_BANDS_JSON)['band_leader_roles']
+ANNOUNCEMENT_CHANNELS_JSON = "settings/announcement.json"
+ANNOUNCEMENT_CHANNELS = utils.json_safeload(ANNOUNCEMENT_CHANNELS_JSON)['channels']
 
 CONTENT_MODERATOR = {
     "api_key": os.environ['CONTENT_MODERATOR_API_KEY'],
@@ -82,8 +96,11 @@ CUSTOM_RDO_FONT = 'assets/chineserocksboldcyrillic.otf'
 SEPARATOR = 'assets/separator.png'
 
 SOLO_SESSION_IMAGE = 'assets/artur-morgan-solo.gif'
+SOLO_SESSION_LEFT_OFF_IMAGE = 'assets/solo_left_off.jpg'
 BAND_IMAGE = 'assets/band.jpg'
+BAND_LEFT_OFF_IMAGE = 'assets/band_left_off.jpg'
 SOLO_EVENT_IMAGE = 'assets/event.jpg'
+SOLO_EVENT_LEFT_OFF_IMAGE = 'assets/event_left_off.jpg'
 
 SETUP_MENU_IMAGE = 'assets/setup_menu.jpg'
 SUCCESS_IMAGE = 'assets/success.jpg'
@@ -94,3 +111,4 @@ MEDIA_ONLY_IMAGE = 'assets/media_only.jpg'
 COMMANDS_ONLY_IMAGE = 'assets/commands_only.jpg'
 NO_MODERATION_IMAGE = 'assets/no_moderation.jpg'
 BOTS_ALLOWED_IMAGE = 'assets/bots_allowed.jpg'
+ANNOUNCEMENT_IMAGE = 'assets/announcement.jpg'

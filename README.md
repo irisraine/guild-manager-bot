@@ -49,9 +49,9 @@ SOLO_SESSION_ROLES = 0000000000000000000, 0000000000000000000
 # Solo session channels
 SOLO_SESSION_CHANNELS = 0000000000000000000, 0000000000000000000
 # Event role
-EVENT_ROLE = 0000000000000000000
+SOLO_EVENT_ROLE = 0000000000000000000
 # Event channel
-EVENT_CHANNEL = 0000000000000000000
+SOLO_EVENT_CHANNEL = 0000000000000000000
 ```
 Once the bot is running, you need to use the configuration panel to specify the list of channels where the bot is 
 active and processes incoming messages in a particular way.

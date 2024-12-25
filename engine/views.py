@@ -49,6 +49,11 @@ class SetupMenuView(nextcord.ui.View):
                 value="bots_allowed",
                 description="Список каналов с контентом от ботов",
                 emoji=config.CATEGORY_EMOJI["bots_allowed"]),
+            nextcord.SelectOption(
+                label="Новостные каналы",
+                value="announcement",
+                description="Список каналов со включенной рассылкой",
+                emoji=config.CATEGORY_EMOJI["announcement"]),
         ]
     )
     async def select_setup_menu_callback(self, select, interaction: nextcord.Interaction):
@@ -81,6 +86,11 @@ class SetupMenuView(nextcord.ui.View):
                 "message": messages.special_channels(category="bots_allowed",
                                                      channels_list=config.BOTS_ALLOWED_CHANNELS),
                 "view": SpecialChannelsView(category="bots_allowed")
+            },
+            "announcement": {
+                "message": messages.special_channels(category="announcement",
+                                                     channels_list=config.ANNOUNCEMENT_CHANNELS),
+                "view": SpecialChannelsView(category="announcement")
             },
         }
         await interaction.response.defer()
@@ -141,6 +151,7 @@ class SpecialChannelsModal(nextcord.ui.Modal):
         'commands_only': {'ids': config.COMMANDS_ONLY_CHANNELS, 'json_file': config.COMMANDS_ONLY_CHANNELS_JSON},
         'no_moderation': {'ids': config.NO_MODERATION_CHANNELS, 'json_file': config.NO_MODERATION_CHANNELS_JSON},
         'bots_allowed': {'ids': config.BOTS_ALLOWED_CHANNELS, 'json_file': config.BOTS_ALLOWED_CHANNELS_JSON},
+        'announcement': {'ids': config.ANNOUNCEMENT_CHANNELS, 'json_file': config.ANNOUNCEMENT_CHANNELS_JSON},
     }
 
     def __init__(self, category, action):

@@ -41,7 +41,7 @@ class TalkView(nextcord.ui.View):
     async def send_message_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.response.send_modal(TalkModal())
 
-    @nextcord.ui.button(label="Закрыть", style=nextcord.ButtonStyle.red, emoji="✖️")
+    @nextcord.ui.button(label="Закрыть", style=nextcord.ButtonStyle.gray, emoji="❌")
     async def close_panel_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.message.delete()
 

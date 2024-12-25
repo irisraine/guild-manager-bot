@@ -31,15 +31,9 @@ class RoleManager(commands.Cog):
         if member_to_assign.bot:
             return await interaction.response.send_message(
                 **messages.error(description="Невозможно назначать или снимать роли у ботов!"))
-        solo_role, solo_channel_name, solo_channel_link = None, None, None
-        if location == "city":
-            solo_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_SESSION_ROLES[0])
-            solo_channel_link = f"https://discord.com/channels/{config.GUILD_ID}/{config.SOLO_SESSION_CHANNELS[0]}"
-            solo_channel_name = "город Подфайловск"
-        elif location == "suburb":
-            solo_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_SESSION_ROLES[1])
-            solo_channel_link = f"https://discord.com/channels/{config.GUILD_ID}/{config.SOLO_SESSION_CHANNELS[1]}"
-            solo_channel_name = "пригород Подфайловска"
+        solo_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_SESSION[location]['role'])
+        solo_channel_link = f"https://discord.com/channels/{config.GUILD_ID}/{config.SOLO_SESSION[location]['channel']}"
+        solo_channel_name = config.SOLO_SESSION[location]['name']
         if action == "add":
             if solo_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(solo_role)
@@ -66,7 +60,8 @@ class RoleManager(commands.Cog):
                         title="❌ Роль снята",
                         description=f"Ковбой {member_to_assign.mention} лишился роли {solo_role.mention} и "
                                     f"покинул {solo_channel_name}.\n\n "
-                                    f"*Роль снял {interaction.user.mention}*")
+                                    f"*Роль снял {interaction.user.mention}*",
+                        image_path=config.SOLO_SESSION_LEFT_OFF_IMAGE),
                 )
                 logging.info(f"C участника {member_to_assign.display_name} снята роль соло сессии "
                              f"(канал {solo_channel_name}), "
@@ -93,7 +88,7 @@ class RoleManager(commands.Cog):
         if member_to_assign.bot:
             return await interaction.response.send_message(
                 **messages.error(description="Невозможно назначать или снимать роли у ботов!"))
-        event_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_EVENT_ROLE)
+        event_role = nextcord.utils.get(interaction.guild.roles, id=config.SOLO_EVENT['role'])
         if action == "add":
             if event_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(event_role)
@@ -101,7 +96,7 @@ class RoleManager(commands.Cog):
                     **messages.custom_embed_message(
                         title="✅ Роль выдана",
                         description=f"Ковбой {member_to_assign.mention} получает роль {event_role.mention} и "
-                                    f"ему открывается доступ в канал <#{config.SOLO_EVENT_CHANNEL}>.\n "
+                                    f"ему открывается доступ в канал <#{config.SOLO_EVENT['channel']}>.\n "
                                     f"Теперь ему доведется пережить невероятные и безумные приключения, "
                                     f"что запомнятся на долгие годы!\n\n *Роль выдал {interaction.user.mention}*",
                         image_path=config.SOLO_EVENT_IMAGE)
@@ -119,8 +114,9 @@ class RoleManager(commands.Cog):
                     **messages.custom_embed_message(
                         title="❌ Роль снята",
                         description=f"Ковбой {member_to_assign.mention} лишился роли {event_role.mention} и завершил "
-                                    f"участие в ивенте. Организаторы надеются, что ему было весело!\n\n "
-                                    f"*Роль снял {interaction.user.mention}*")
+                                    f"участие в ивенте. Несомненно, впечатлений ему хватит на целую жизнь!\n\n "
+                                    f"*Роль снял {interaction.user.mention}*",
+                        image_path=config.SOLO_EVENT_LEFT_OFF_IMAGE),
                 )
                 logging.info(f"C участника {member_to_assign.display_name} снята роль участника ивента, "
                              f"ее забрал модератор {interaction.user.display_name}.")
@@ -192,7 +188,8 @@ class RoleManager(commands.Cog):
                         title="❌ Исключение из банды",
                         description=f"Ковбой {member_to_assign.mention} лишился членства в {band_role.mention}. Теперь "
                                     f"он одиночка, которому никто не прикроет спину во время скитаний по прериям.\n\n "
-                                    f"*Членство отнял предводитель банды {interaction.user.mention}*")
+                                    f"*Членство отнял предводитель банды {interaction.user.mention}*",
+                        image_path=config.BAND_LEFT_OFF_IMAGE),
                 )
                 logging.info(f"Участник {member_to_assign.display_name} исключен из '{band_role.name}', "
                              f"его выгнал предводитель банды {interaction.user.display_name}.")

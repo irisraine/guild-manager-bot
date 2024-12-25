@@ -99,6 +99,12 @@ def special_channels(category, channels_list):
                         f"сообщений, в частности, разрешить создание тредов для сообщений от ботов, что в обычных "
                         f"условиях невозможно.")
         image_path = config.BOTS_ALLOWED_IMAGE
+    elif category == "announcement":
+        title += " новостных каналов"
+        description += ("Каналы, сообщения в которых после публикации автоматически рассылаются на другие серверы, "
+                        "оформившие подписку на них.\n\n"
+                        f"{channels_list_with_mentions}")
+        image_path = config.ANNOUNCEMENT_IMAGE
     embed_message = MessageContainer(
         title=title,
         description=description,
