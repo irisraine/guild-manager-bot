@@ -168,13 +168,13 @@ class SpecialChannelsModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer()
+        special_channel_id = utils.get_valid_id(self.special_channel.value)
         if self.action == "add":
-            if not utils.validator(self.special_channel.value):
+            if not special_channel_id:
                 return await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel_id=self.special_channel.value, action=self.action, is_valid=False, reason="typo"
+                        action=self.action, is_valid=False, reason="typo"
                     ))
-            special_channel_id = int(self.special_channel.value)
             if special_channel_id not in self.CATEGORIES[self.category]['ids']:
                 channel = bot.client.get_channel(special_channel_id)
                 if channel:
@@ -185,25 +185,24 @@ class SpecialChannelsModal(nextcord.ui.Modal):
                     )
                     await interaction.followup.send(
                         **messages.special_channels_confirmation(
-                            channel_id=special_channel_id, action=self.action
+                            action=self.action, channel_id=special_channel_id
                         ))
                 else:
                     await interaction.followup.send(
                         **messages.special_channels_confirmation(
-                            channel_id=special_channel_id, action=self.action, is_valid=False, reason="not_exist"
+                            action=self.action, is_valid=False, reason="not_exist"
                         ))
             else:
                 await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel_id=special_channel_id, action=self.action, is_valid=False, reason="already_added"
+                        action=self.action, is_valid=False, reason="already_added"
                     ))
         if self.action == "remove":
-            if not utils.validator(self.special_channel.value):
+            if not special_channel_id:
                 return await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel_id=self.special_channel.value, action=self.action, is_valid=False, reason="typo"
+                        action=self.action, is_valid=False, reason="typo"
                     ))
-            special_channel_id = int(self.special_channel.value)
             if special_channel_id in self.CATEGORIES[self.category]['ids']:
                 self.CATEGORIES[self.category]['ids'].remove(special_channel_id)
                 utils.json_safewrite(
@@ -212,12 +211,12 @@ class SpecialChannelsModal(nextcord.ui.Modal):
                 )
                 await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel_id=special_channel_id, action=self.action
+                        action=self.action, channel_id=special_channel_id
                     ))
             else:
                 await interaction.followup.send(
                     **messages.special_channels_confirmation(
-                        channel_id=special_channel_id, action=self.action, is_valid=False, reason="already_removed"
+                        action=self.action, is_valid=False, reason="already_removed"
                     ))
 
 
@@ -253,19 +252,18 @@ class AuthorizedBandsAddModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer()
-        if not utils.validator(self.band_role.value):
+        band_role_id = utils.get_valid_id(self.band_role.value)
+        band_leader_role_id = utils.get_valid_id(self.band_leader_role.value)
+        if not band_role_id:
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role_id=self.band_role.value, action="add",
-                    is_valid=False, role_category="band", reason="typo"
+                    action="add", is_valid=False, role_category="band", reason="typo"
                 ))
-        if not utils.validator(self.band_leader_role.value):
+        if not band_leader_role_id:
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role_id=self.band_role.value, action="add",
-                    is_valid=False, role_category="band_leader", reason="typo"
+                    action="add", is_valid=False, role_category="band_leader", reason="typo"
                 ))
-        band_role_id, band_leader_role_id = int(self.band_role.value), int(self.band_leader_role.value)
         if band_role_id not in config.AUTHORIZED_BAND_ROLES and band_leader_role_id not in config.AUTHORIZED_BAND_LEADERS_ROLES:
             band_role = interaction.guild.get_role(band_role_id)
             band_leader_role = interaction.guild.get_role(band_leader_role_id)
@@ -281,31 +279,27 @@ class AuthorizedBandsAddModal(nextcord.ui.Modal):
                 )
                 await interaction.followup.send(
                     **messages.authorized_bands_confirmation(
-                        band_role_id=band_role_id, action="add"
+                        action="add", band_role_id=band_role_id
                     ))
             elif not band_role:
                 return await interaction.followup.send(
                     **messages.authorized_bands_confirmation(
-                        band_role_id=band_role_id, action="add", is_valid=False,
-                        role_category="band", reason="not_exist"
+                        action="add", is_valid=False, role_category="band", reason="not_exist"
                     ))
             elif not band_leader_role:
                 return await interaction.followup.send(
                     **messages.authorized_bands_confirmation(
-                        band_role_id=band_role_id, action="add", is_valid=False,
-                        role_category="band_leader", reason="not_exist"
+                        action="add", is_valid=False, role_category="band_leader", reason="not_exist"
                     ))
         elif band_role_id in config.AUTHORIZED_BAND_ROLES:
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role_id=band_role_id, action="add", is_valid=False,
-                    role_category="band", reason="already_added"
+                    action="add", is_valid=False, role_category="band", reason="already_added"
                 ))
         elif band_leader_role_id in config.AUTHORIZED_BAND_LEADERS_ROLES:
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role_id=band_role_id, action="add", is_valid=False,
-                    role_category="band_leader", reason="already_added"
+                    action="add", is_valid=False, role_category="band_leader", reason="already_added"
                 ))
 
 
@@ -322,12 +316,12 @@ class AuthorizedBandsRemoveModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer()
-        if not utils.validator(self.band_role.value):
+        band_role_id = utils.get_valid_id(self.band_role.value)
+        if not band_role_id:
             return await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role_id=self.band_role.value, action="remove", is_valid=False, reason="typo"
+                    action="remove", is_valid=False, reason="typo"
                 ))
-        band_role_id = int(self.band_role.value)
         if band_role_id in config.AUTHORIZED_BAND_ROLES:
             band_role_index = config.AUTHORIZED_BAND_ROLES.index(band_role_id)
             config.AUTHORIZED_BAND_ROLES.remove(band_role_id)
@@ -341,10 +335,10 @@ class AuthorizedBandsRemoveModal(nextcord.ui.Modal):
             )
             await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role_id=band_role_id, action="remove"
+                    action="remove", band_role_id=band_role_id
                 ))
         else:
             await interaction.followup.send(
                 **messages.authorized_bands_confirmation(
-                    band_role_id=band_role_id, action="remove", is_valid=False, reason="already_removed"
+                    action="remove", is_valid=False, reason="already_removed"
                 ))

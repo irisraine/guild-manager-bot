@@ -86,9 +86,10 @@ def json_safewrite(filepath, data):
             os.remove(temp_jsonfile_name)
 
 
-def validator(value):
+def get_valid_id(value):
     try:
         int_value = int(value)
-        return 18 <= len(str(int_value)) <= 19
+        if 18 <= len(str(int_value)) <= 19:
+            return int_value
     except (ValueError, TypeError):
         return False

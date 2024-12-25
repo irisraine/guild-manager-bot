@@ -113,7 +113,7 @@ def special_channels(category, channels_list):
     return {'embed': embed_message.embed, 'file': embed_message.image}
 
 
-def special_channels_confirmation(channel_id, action=None, is_valid=True, reason=None):
+def special_channels_confirmation(action=None, channel_id=None, is_valid=True, reason=None):
     title = SUCCESS_HEADER if is_valid else ERROR_HEADER
     image_path = config.SUCCESS_IMAGE if is_valid else config.ERROR_IMAGE
     description = "Канал "
@@ -163,7 +163,7 @@ def authorized_bands(roles_list):
     return {'embed': embed_message.embed, 'file': embed_message.image}
 
 
-def authorized_bands_confirmation(band_role_id, action=None, is_valid=True, role_category=None, reason=None):
+def authorized_bands_confirmation(action=None, band_role_id=None, is_valid=True, role_category=None, reason=None):
     title = SUCCESS_HEADER if is_valid else ERROR_HEADER
     image_path = config.SUCCESS_IMAGE if is_valid else config.ERROR_IMAGE
     description = ""
