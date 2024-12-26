@@ -21,7 +21,7 @@ class TalkModal(nextcord.ui.Modal):
         channel = interaction.guild.get_channel(config.COMMON_DISCUSSION_CHANNEL)
         await channel.send(self.message_content.value)
         await interaction.followup.send(
-            **messages.custom_embed_message(description="Сообщение в салун отправлено!"),
+            **messages.custom_embed(description="Сообщение в салун отправлено!"),
             ephemeral=True
         )
 
@@ -54,7 +54,7 @@ class Talk(commands.Cog):
     @application_checks.has_role(config.ADMIN_ROLE)
     async def say(self, interaction: nextcord.Interaction):
         await interaction.response.send_message(
-            **messages.custom_embed_message(
+            **messages.custom_embed(
                 title="Сообщение в салун от лица Лесного Оленя",
                 description="Лесной олень стал сильнее и умнее, по воле своего творца обретя дар разума и речи. "
                             "На что же он употребит обретенную мощь? С каким словом обратится к миру?"),

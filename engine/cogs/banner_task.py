@@ -82,7 +82,7 @@ class BannerTask(commands.Cog):
             banner_binary_data = self.get_banner_binary_data(config.BANNER_IMAGE)
             await guild.edit(banner=banner_binary_data)
         status = "активирован" if toggle == "on" else "отключен"
-        await interaction.response.send_message(**messages.custom_embed_message(
+        await interaction.response.send_message(**messages.custom_embed(
             description=f"Динамический баннер {status}."
         ))
         logging.info(f"Динамический баннер {status}.")

@@ -38,7 +38,7 @@ class RoleManager(commands.Cog):
             if solo_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(solo_role)
                 await interaction.response.send_message(
-                    **messages.custom_embed_message(
+                    **messages.custom_embed(
                         title="✅ Роль выдана",
                         description=f"Ковбой {member_to_assign.mention} получает роль {solo_role.mention} и "
                                     f"въезжает в [{solo_channel_name}]({solo_channel_link})!\n\n "
@@ -56,7 +56,7 @@ class RoleManager(commands.Cog):
             if solo_role in member_to_assign.roles:
                 await member_to_assign.remove_roles(solo_role)
                 await interaction.response.send_message(
-                    **messages.custom_embed_message(
+                    **messages.custom_embed(
                         title="❌ Роль снята",
                         description=f"Ковбой {member_to_assign.mention} лишился роли {solo_role.mention} и "
                                     f"покинул {solo_channel_name}.\n\n "
@@ -93,7 +93,7 @@ class RoleManager(commands.Cog):
             if event_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(event_role)
                 await interaction.response.send_message(
-                    **messages.custom_embed_message(
+                    **messages.custom_embed(
                         title="✅ Роль выдана",
                         description=f"Ковбой {member_to_assign.mention} получает роль {event_role.mention} и "
                                     f"ему открывается доступ в канал <#{config.SOLO_EVENT['channel']}>.\n "
@@ -111,7 +111,7 @@ class RoleManager(commands.Cog):
             if event_role in member_to_assign.roles:
                 await member_to_assign.remove_roles(event_role)
                 await interaction.response.send_message(
-                    **messages.custom_embed_message(
+                    **messages.custom_embed(
                         title="❌ Роль снята",
                         description=f"Ковбой {member_to_assign.mention} лишился роли {event_role.mention} и завершил "
                                     f"участие в ивенте. Несомненно, впечатлений ему хватит на целую жизнь!\n\n "
@@ -167,7 +167,7 @@ class RoleManager(commands.Cog):
             if band_role not in member_to_assign.roles:
                 await member_to_assign.add_roles(band_role)
                 await interaction.response.send_message(
-                    **messages.custom_embed_message(
+                    **messages.custom_embed(
                         title="✅ Вступление в банду",
                         description=f"Ковбой {member_to_assign.mention} вступает в {band_role.mention}, и вместе с "
                                     f"новыми товарищами готов взяться за дела, слава о которых еще прогремит по всему "
@@ -184,7 +184,7 @@ class RoleManager(commands.Cog):
             if band_role in member_to_assign.roles:
                 await member_to_assign.remove_roles(band_role)
                 await interaction.response.send_message(
-                    **messages.custom_embed_message(
+                    **messages.custom_embed(
                         title="❌ Исключение из банды",
                         description=f"Ковбой {member_to_assign.mention} лишился членства в {band_role.mention}. Теперь "
                                     f"он одиночка, которому никто не прикроет спину во время скитаний по прериям.\n\n "

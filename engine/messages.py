@@ -206,7 +206,7 @@ def authorized_bands_confirmation(action=None, band_role_id=None, is_valid=True,
     return {'embed': embed_message.embed, 'file': embed_message.image, 'ephemeral': True}
 
 
-def custom_embed_message(title=None, description=None, image_path=None, color="green"):
+def custom_embed(title=None, description=None, image_path=None, color="green"):
     title = SUCCESS_HEADER if not title else title
     embed_message = MessageContainer(
         title=title,

@@ -107,7 +107,7 @@ class ImageModerator(commands.Cog):
                     previous_warning_message = await self.safe_fetch_message(previous_warning_id)
                     if previous_warning_message:
                         await self.delete_message(previous_warning_message)
-                warning_message = await message.channel.send(**messages.custom_embed_message(
+                warning_message = await message.channel.send(**messages.custom_embed(
                     title="💢 It's time to stop! 💢",
                     description=f"Уважаемый {message.author.mention}! Ваш бесплатный пробный период использования "
                                 f"гифок на данный момент закончился. Для продления насыпьте костей или сена в "
@@ -142,7 +142,7 @@ class ImageModerator(commands.Cog):
             if after.id in self.muted_users.keys():
                 channel = self.muted_users[after.id]['channel']
                 reason_for_muting = self.muted_users[after.id]['reason']
-                await channel.send(**messages.custom_embed_message(
+                await channel.send(**messages.custom_embed(
                     title="❌ Здравствуйте, вам бан! ❌",
                     description=f"Абоба {after.mention} {reason_for_muting}! "
                                 f"Теперь он улетает в мут, хорошенько подумать о своем поведении!",
@@ -168,7 +168,7 @@ class ImageModerator(commands.Cog):
             self.purge_gif_warnings.stop()
             self.users_gifs.clear()
         status = "установлено" if toggle == "on" else "отменено"
-        await interaction.response.send_message(**messages.custom_embed_message(
+        await interaction.response.send_message(**messages.custom_embed(
             description=f"Ограничение на использование гифок {status}."
         ))
         logging.info(f'Ограничение на использование гифок {status}.')
