@@ -169,8 +169,7 @@ class ImageModerator(commands.Cog):
             self.users_gifs.clear()
         status = "установлено" if toggle == "on" else "отменено"
         await interaction.response.send_message(**messages.custom_embed_message(
-            description=f"Ограничение на использование гифок {status}.",
-            color="red"
+            description=f"Ограничение на использование гифок {status}."
         ))
         logging.info(f'Ограничение на использование гифок {status}.')
 
