@@ -72,7 +72,7 @@ class RoleManager(commands.Cog):
                                                  f"роли {solo_role.mention}, снимать с него нечего!"))
 
     @nextcord.slash_command(description="Управление ролью участника ивента")
-    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, config.MODERATOR_ASSISTANT_ROLE)
+    @application_checks.has_any_role(config.ADMIN_ROLE, config.MODERATOR_ROLE, config.MODERATOR_ASSISTANT_ROLE, *config.AUTHORIZED_BAND_LEADERS_ROLES)
     async def event(
             self,
             interaction: nextcord.Interaction,
