@@ -50,12 +50,12 @@ def toggle_extension(action=None, extension=None, is_valid=True):
     return {'embed': embed_message.embed, 'file': embed_message.image}
 
 
-def setup():
+def settings():
     embed_message = MessageContainer(
         title="Панель конфигурации",
         description="Настройки бота, позволяющие установить специальные свойства для каналов и ролей. "
                     "Доступно только для администраторов.",
-        image_path=config.SETUP_MENU_IMAGE
+        image_path=config.SETTINGS_MENU_IMAGE
     )
     return {'embed': embed_message.embed, 'file': embed_message.image}
 

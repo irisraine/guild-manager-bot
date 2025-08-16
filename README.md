@@ -57,7 +57,7 @@ Once the bot is running, you need to use the configuration panel to specify the 
 active and processes incoming messages in a particular way.
 
 After you have added all the necessary environment variables to the .env file, and configure channels 
-using `/setup` option, you are ready to use the bot. 
+using `/settings` option, you are ready to use the bot. 
 
 If you want to use a dynamic banner function, be sure that you put your current server's banner image in `assets` 
 folder with name `banner.jpg` (replace the default image). 
@@ -72,7 +72,7 @@ info of overall server members number. Updating period is set to 10 minutes.
 - `/band <action> <member>`, `/solo <action> <member>`, `/event <action> <member>` - commands to assign or de-assign 
 specific roles. This commands available only for moderators and group leaders.
 - `/say` - send custom message in main chat channel from bot itself.
-- `/setup` - configuration panel, that allows the admin to set up the channels where bot performs specific actions. 
+- `/settings` - configuration panel, that allows the admin to set up the channels where bot performs specific actions. 
 
 ## Extensions
 

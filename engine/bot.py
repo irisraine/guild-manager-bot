@@ -82,10 +82,10 @@ async def toggle_extension(
 
 @client.slash_command(description="Панель конфигурации")
 @application_checks.has_permissions(administrator=True)
-async def setup(interaction: nextcord.Interaction):
+async def settings(interaction: nextcord.Interaction):
     await interaction.response.send_message(
-        **messages.setup(),
-        view=views.SetupMenuView()
+        **messages.settings(),
+        view=views.SettingsMenuView()
     )
 
 

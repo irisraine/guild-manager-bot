@@ -112,7 +112,7 @@ BAND_LEFT_OFF_IMAGE = 'assets/band_left_off.jpg'
 SOLO_EVENT_IMAGE = 'assets/event.jpg'
 SOLO_EVENT_LEFT_OFF_IMAGE = 'assets/event_left_off.jpg'
 
-SETUP_MENU_IMAGE = 'assets/setup_menu.jpg'
+SETTINGS_MENU_IMAGE = 'assets/settings_menu.jpg'
 SUCCESS_IMAGE = 'assets/success.jpg'
 ERROR_IMAGE = 'assets/error.jpg'
 AUTO_THREADING_IMAGE = 'assets/auto_threading.jpg'

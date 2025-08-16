@@ -5,7 +5,7 @@ import engine.config as config
 import engine.utils as utils
 
 
-class SetupMenuView(nextcord.ui.View):
+class SettingsMenuView(nextcord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
@@ -56,8 +56,8 @@ class SetupMenuView(nextcord.ui.View):
                 emoji=config.CATEGORY_EMOJI["announcement"]),
         ]
     )
-    async def select_setup_menu_callback(self, select, interaction: nextcord.Interaction):
-        setup_actions = {
+    async def select_settings_menu_callback(self, select, interaction: nextcord.Interaction):
+        settings_actions = {
             "auto_threading": {
                 "message": messages.special_channels(category="auto_threading"),
                 "view": SpecialChannelsView(category="auto_threading")
@@ -89,8 +89,8 @@ class SetupMenuView(nextcord.ui.View):
         }
         await interaction.response.defer()
         await interaction.edit_original_message(
-            **setup_actions[select.values[0]]["message"],
-            view=setup_actions[select.values[0]]["view"]
+            **settings_actions[select.values[0]]["message"],
+            view=settings_actions[select.values[0]]["view"]
         )
 
     @nextcord.ui.button(label="Закрыть панель конфигурации", style=nextcord.ButtonStyle.gray, emoji="❌")
@@ -99,7 +99,7 @@ class SetupMenuView(nextcord.ui.View):
         await interaction.delete_original_message()
 
 
-class SetupActionBasicView(nextcord.ui.View):
+class SettingsActionBasicView(nextcord.ui.View):
     def __init__(self, *args, **kwargs):
         super().__init__(timeout=None, *args, **kwargs)
 
@@ -111,11 +111,11 @@ class SetupActionBasicView(nextcord.ui.View):
             return False
 
     @nextcord.ui.button(label="Вернуться в панель конфигурации", style=nextcord.ButtonStyle.gray, emoji="◀️", row=2)
-    async def return_to_setup_menu_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def return_to_settings_menu_callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.response.defer()
         await interaction.edit_original_message(
-            **messages.setup(),
-            view=SetupMenuView()
+            **messages.settings(),
+            view=SettingsMenuView()
         )
 
     @nextcord.ui.button(label="Закрыть", style=nextcord.ButtonStyle.gray, emoji="❌", row=2)
@@ -124,7 +124,7 @@ class SetupActionBasicView(nextcord.ui.View):
         await interaction.delete_original_message()
 
 
-class SpecialChannelsView(SetupActionBasicView):
+class SpecialChannelsView(SettingsActionBasicView):
     def __init__(self, category):
         super().__init__()
         self.category = category
@@ -205,7 +205,7 @@ class SpecialChannelsModal(nextcord.ui.Modal):
                     ))
 
 
-class AuthorizedBandsView(SetupActionBasicView):
+class AuthorizedBandsView(SettingsActionBasicView):
     def __init__(self):
         super().__init__()
 
